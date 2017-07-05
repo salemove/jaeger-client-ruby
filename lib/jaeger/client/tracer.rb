@@ -1,8 +1,13 @@
 module Jaeger
   module Client
     class Tracer
-      def initialize(client, service_name)
-        @client = client
+      def initialize(collector, sender)
+        @collector = collector
+        @sender = sender
+      end
+
+      def stop
+        @sender.stop
       end
 
       # Starts a new span.
@@ -23,7 +28,7 @@ module Jaeger
           else
             SpanContext.create_parent_context
           end
-        Span.new(context, operation_name, @client, start_time: start_time, tags: tags)
+        Span.new(context, operation_name, @collector, start_time: start_time, tags: tags)
       end
 
       # Inject a SpanContext into the given carrier

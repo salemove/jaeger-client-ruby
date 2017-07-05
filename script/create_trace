@@ -8,8 +8,8 @@ require 'jaeger/client'
 host = ENV['JAEGER_HOST'] || '127.0.0.1'
 port = ENV['JAEGER_HOST'] || 6831
 
-tracer1 = Jaeger::Client.build(host: host, port: port.to_i, service_name: 'test-service')
-tracer2 = Jaeger::Client.build(host: host, port: port.to_i, service_name: 'downstream-service')
+tracer1 = Jaeger::Client.build(host: host, port: port.to_i, service_name: 'test-service', flush_interval: 1)
+tracer2 = Jaeger::Client.build(host: host, port: port.to_i, service_name: 'downstream-service', flush_interval: 1)
 
 outer_span = tracer1.start_span('receive request', tags: {
   'span.kind' => 'server'
@@ -39,5 +39,8 @@ inner_span.finish
 sleep 0.1 # doing something with fetched info
 outer_span.finish
 
-puts "Finishing..."
-sleep 3
+tracer1.stop
+tracer2.stop
+
+puts "Finished"
+

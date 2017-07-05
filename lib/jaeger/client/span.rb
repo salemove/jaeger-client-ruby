@@ -9,13 +9,13 @@ module Jaeger
       #
       # @param context [SpanContext] the context of the span
       # @param context [String] the operation name
-      # @param client [UdpSender] span emitter
+      # @param collector [Collector] span collector
       #
       # @return [Span] a new Span
-      def initialize(context, operation_name, client, start_time: Time.now, tags: {})
+      def initialize(context, operation_name, collector, start_time: Time.now, tags: {})
         @context = context
         @operation_name = operation_name
-        @client = client
+        @collector = collector
         @start_time = start_time
         @tags = tags
         @logs = []
@@ -59,7 +59,7 @@ module Jaeger
       #
       # @param end_time [Time] custom end time, if not now
       def finish(end_time: Time.now)
-        @client.send_span(self, end_time)
+        @collector.send_span(self, end_time)
       end
 
       private
