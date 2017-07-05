@@ -20,8 +20,8 @@ describe Jaeger::Client::Tracer do
           expect(span.context.trace_id).to_not be_nil
         end
 
-        it 'does not have parent_id' do
-          expect(span.context.parent_id).to be_nil
+        it 'does not have parent' do
+          expect(span.context.parent_id).to eq(0)
         end
       end
     end
@@ -78,7 +78,7 @@ describe Jaeger::Client::Tracer do
 
       it 'sets trace information' do
         expect(carrier['uber-trace-id']).to eq(
-          "#{span_context.trace_id}:#{span_context.span_id}:0:0"
+          "#{span_context.trace_id.to_s(16)}:#{span_context.span_id.to_s(16)}:0:0"
         )
       end
     end
@@ -86,24 +86,32 @@ describe Jaeger::Client::Tracer do
 
   describe '#extract' do
     let(:operation_name) { 'operator-name' }
-    let(:trace_id) { 'trace-id' }
-    let(:parent_id) { 'parent-id' }
-    let(:span_id) { 'span-id' }
+    let(:trace_id) { '58a515c97fd61fd7' }
+    let(:parent_id) { '8e5a8c5509c8dcc1' }
+    let(:span_id) { 'aba8be8d019abed2' }
 
     context 'when FORMAT_TEXT_MAP' do
       let(:carrier) { { 'uber-trace-id' => "#{trace_id}:#{span_id}:#{parent_id}:0" } }
       let(:span_context) { tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
       it 'has trace-id' do
-        expect(span_context.trace_id).to eq(trace_id)
+        expect(span_context.trace_id).to eq(trace_id.to_i(16))
       end
 
       it 'has parent-id' do
-        expect(span_context.parent_id).to eq(parent_id)
+        expect(span_context.parent_id).to eq(parent_id.to_i(16))
       end
 
       it 'has span-id' do
-        expect(span_context.span_id).to eq(span_id)
+        expect(span_context.span_id).to eq(span_id.to_i(16))
+      end
+
+      context 'when parent-id is 0' do
+        let(:parent_id) { '0' }
+
+        it 'sets parent_id to 0' do
+          expect(span_context.parent_id).to eq(0)
+        end
       end
 
       context 'when trace-id missing' do
@@ -128,18 +136,26 @@ describe Jaeger::Client::Tracer do
       let(:span_context) { tracer.extract(OpenTracing::FORMAT_RACK, carrier) }
 
       it 'has trace-id' do
-        expect(span_context.trace_id).to eq(trace_id)
+        expect(span_context.trace_id).to eq(trace_id.to_i(16))
       end
 
       it 'has parent-id' do
-        expect(span_context.parent_id).to eq(parent_id)
+        expect(span_context.parent_id).to eq(parent_id.to_i(16))
       end
 
       it 'has span-id' do
-        expect(span_context.span_id).to eq(span_id)
+        expect(span_context.span_id).to eq(span_id.to_i(16))
       end
 
-      context 'when X-Trace-Id missing' do
+      context 'when parent-id is 0' do
+        let(:parent_id) { '0' }
+
+        it 'sets parent_id to 0' do
+          expect(span_context.parent_id).to eq(0)
+        end
+      end
+
+      context 'when trace-id is missing' do
         let(:trace_id) { nil }
 
         it 'returns nil' do
@@ -147,7 +163,7 @@ describe Jaeger::Client::Tracer do
         end
       end
 
-      context 'when X-Trace-Span-Id missing' do
+      context 'when span-id is missing' do
         let(:span_id) { nil }
 
         it 'returns nil' do

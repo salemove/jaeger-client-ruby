@@ -40,10 +40,10 @@ module Jaeger
         case format
         when OpenTracing::FORMAT_TEXT_MAP, OpenTracing::FORMAT_RACK
           carrier['uber-trace-id'] = [
-            span_context.trace_id,
-            span_context.span_id,
-            span_context.parent_id || 0,
-            span_context.flags
+            span_context.trace_id.to_s(16),
+            span_context.span_id.to_s(16),
+            span_context.parent_id.to_s(16),
+            span_context.flags.to_s(16)
           ].join(':')
         else
           warn "Jaeger::Client with format #{format} is not supported yet"
@@ -71,13 +71,18 @@ module Jaeger
 
       def parse_context(trace)
         return nil if !trace || trace == ''
-        trace_id, span_id, parent_id, _flags = trace.split(':')
 
-        parent_id = parent_id
-        parent_id = nil if parent_id == ''
+        trace_arguments = trace.split(':').map {|arg| arg.to_i(16)}
+        return nil if trace_arguments.size != 4
 
-        if trace_id != '' && span_id != ''
-          SpanContext.new(trace_id: trace_id, parent_id: parent_id, span_id: span_id)
+        trace_id, span_id, parent_id, _flags = trace_arguments
+
+        if trace_id != 0 && span_id != 0
+          SpanContext.new(
+            trace_id: trace_id,
+            parent_id: parent_id,
+            span_id: span_id
+          )
         else
           nil
         end

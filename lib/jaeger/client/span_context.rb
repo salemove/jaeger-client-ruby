@@ -17,12 +17,23 @@ module Jaeger
 
       attr_reader :span_id, :parent_id, :trace_id, :baggage, :flags
 
-      def initialize(span_id:, parent_id: nil, trace_id:, baggage: {})
+      def initialize(span_id:, parent_id: 0, trace_id:, baggage: {})
         @span_id = span_id
         @parent_id = parent_id
         @trace_id = trace_id
         @baggage = baggage
         @flags = 0
+      end
+
+      def inspect
+        to_s
+      end
+
+      def to_s
+        "#<SpanContext @span_id=#{span_id.to_s(16)} " +
+          "@parent_id=#{parent_id.to_s(16)} " +
+          "@trace_id=#{trace_id.to_s(16)} " +
+          "@flags=#{flags}>"
       end
     end
   end

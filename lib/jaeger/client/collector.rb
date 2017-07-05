@@ -13,9 +13,9 @@ module Jaeger
 
         @buffer << Jaeger::Thrift::Span.new(
           'traceIdLow' => context.trace_id,
-          'traceIdHigh' => context.trace_id,
+          'traceIdHigh' => 0,
           'spanId' => context.span_id,
-          'parentSpanId' => context.parent_id || 0,
+          'parentSpanId' => context.parent_id,
           'operationName' => span.operation_name,
           'references' => [],
           'flags' => context.flags,
