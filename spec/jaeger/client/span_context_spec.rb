@@ -6,11 +6,13 @@ RSpec.describe Jaeger::Client::SpanContext do
       described_class.new(
         trace_id: trace_id,
         parent_id: nil,
-        span_id: parent_span_id
+        span_id: parent_span_id,
+        flags: parent_flags
       )
     end
     let(:trace_id) { 'trace-id' }
     let(:parent_span_id) { 'span-id' }
+    let(:parent_flags) { described_class::Flags::SAMPLED }
 
     it 'has same trace ID' do
       context = described_class.create_from_parent_context(parent)
@@ -25,6 +27,11 @@ RSpec.describe Jaeger::Client::SpanContext do
     it 'has same its own span id' do
       context = described_class.create_from_parent_context(parent)
       expect(context.span_id).to_not eq(parent_span_id)
+    end
+
+    it 'has parent flags' do
+      context = described_class.create_from_parent_context(parent)
+      expect(context.flags).to eq(parent_flags)
     end
   end
 end

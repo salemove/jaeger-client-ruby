@@ -78,7 +78,12 @@ describe Jaeger::Client::Tracer do
 
       it 'sets trace information' do
         expect(carrier['uber-trace-id']).to eq(
-          "#{span_context.trace_id.to_s(16)}:#{span_context.span_id.to_s(16)}:0:0"
+          [
+            span_context.trace_id.to_s(16),
+            span_context.span_id.to_s(16),
+            span_context.parent_id.to_s(16),
+            span_context.flags.to_s(16)
+          ].join(':')
         )
       end
     end
@@ -89,9 +94,10 @@ describe Jaeger::Client::Tracer do
     let(:trace_id) { '58a515c97fd61fd7' }
     let(:parent_id) { '8e5a8c5509c8dcc1' }
     let(:span_id) { 'aba8be8d019abed2' }
+    let(:flags) { '1' }
 
     context 'when FORMAT_TEXT_MAP' do
-      let(:carrier) { { 'uber-trace-id' => "#{trace_id}:#{span_id}:#{parent_id}:0" } }
+      let(:carrier) { { 'uber-trace-id' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
       let(:span_context) { tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
       it 'has trace-id' do
@@ -104,6 +110,10 @@ describe Jaeger::Client::Tracer do
 
       it 'has span-id' do
         expect(span_context.span_id).to eq(span_id.to_i(16))
+      end
+
+      it 'has flags' do
+        expect(span_context.flags).to eq(flags.to_i(16))
       end
 
       context 'when parent-id is 0' do
@@ -132,7 +142,7 @@ describe Jaeger::Client::Tracer do
     end
 
     context 'when FORMAT_RACK' do
-      let(:carrier) { { 'HTTP_UBER_TRACE_ID' => "#{trace_id}:#{span_id}:#{parent_id}:0" } }
+      let(:carrier) { { 'HTTP_UBER_TRACE_ID' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
       let(:span_context) { tracer.extract(OpenTracing::FORMAT_RACK, carrier) }
 
       it 'has trace-id' do
@@ -145,6 +155,10 @@ describe Jaeger::Client::Tracer do
 
       it 'has span-id' do
         expect(span_context.span_id).to eq(span_id.to_i(16))
+      end
+
+      it 'has flags' do
+        expect(span_context.flags).to eq(flags.to_i(16))
       end
 
       context 'when parent-id is 0' do

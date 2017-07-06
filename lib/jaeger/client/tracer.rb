@@ -75,13 +75,14 @@ module Jaeger
         trace_arguments = trace.split(':').map {|arg| arg.to_i(16)}
         return nil if trace_arguments.size != 4
 
-        trace_id, span_id, parent_id, _flags = trace_arguments
+        trace_id, span_id, parent_id, flags = trace_arguments
 
         if trace_id != 0 && span_id != 0
           SpanContext.new(
             trace_id: trace_id,
             parent_id: parent_id,
-            span_id: span_id
+            span_id: span_id,
+            flags: flags
           )
         else
           nil
