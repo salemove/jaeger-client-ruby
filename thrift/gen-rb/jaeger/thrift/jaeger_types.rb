@@ -61,11 +61,11 @@ module Jaeger
     class Log
       include ::Thrift::Struct, ::Thrift::Struct_Union
       TIMESTAMP = 1
-      FIELDS = 2
+      LOG_FIELDS = 2
 
       FIELDS = {
         TIMESTAMP => {:type => ::Thrift::Types::I64, :name => 'timestamp'},
-        FIELDS => {:type => ::Thrift::Types::LIST, :name => 'fields', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Jaeger::Thrift::Tag}}
+        LOG_FIELDS => {:type => ::Thrift::Types::LIST, :name => 'fields', :element => {:type => ::Thrift::Types::STRUCT, :class => ::Jaeger::Thrift::Tag}}
       }
 
       def struct_fields; FIELDS; end
