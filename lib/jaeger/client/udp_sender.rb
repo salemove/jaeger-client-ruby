@@ -1,5 +1,6 @@
 require_relative './udp_sender/transport'
 require 'jaeger/thrift/agent'
+require 'socket'
 require 'thread'
 
 module Jaeger
@@ -9,6 +10,27 @@ module Jaeger
         @service_name = service_name
         @collector = collector
         @flush_interval = flush_interval
+
+        @tags = [
+          Jaeger::Thrift::Tag.new(
+            'key' => 'jaeger.version',
+            'vType' => Jaeger::Thrift::TagType::STRING,
+            'vStr' => 'Ruby-' + Jaeger::Client::VERSION
+          ),
+          Jaeger::Thrift::Tag.new(
+            'key' => 'hostname',
+            'vType' => Jaeger::Thrift::TagType::STRING,
+            'vStr' => Socket.gethostname
+          )
+        ]
+        ipv4 = Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }
+        if !ipv4.nil?
+          @tags << Jaeger::Thrift::Tag.new(
+            'key' => 'ip',
+            'vType' => Jaeger::Thrift::TagType::STRING,
+            'vStr' => ipv4.ip_address
+          )
+        end
 
         transport = Transport.new(host, port)
         protocol = ::Thrift::CompactProtocol.new(transport)
@@ -38,7 +60,7 @@ module Jaeger
         batch = Jaeger::Thrift::Batch.new(
           'process' => Jaeger::Thrift::Process.new(
             'serviceName' => @service_name,
-            'tags' => [],
+            'tags' => @tags
           ),
           'spans' => thrift_spans
         )
