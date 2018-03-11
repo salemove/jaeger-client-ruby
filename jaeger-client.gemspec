@@ -2,9 +2,11 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
+require 'jaeger/client/version'
+
 Gem::Specification.new do |spec|
   spec.name          = 'jaeger-client'
-  spec.version       = '0.4.1'
+  spec.version       = Jaeger::Client::VERSION
   spec.authors       = ['SaleMove TechMovers']
   spec.email         = ['techmovers@salemove.com']
 

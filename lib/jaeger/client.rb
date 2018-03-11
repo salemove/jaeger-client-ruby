@@ -9,6 +9,7 @@ require_relative 'client/carrier'
 require_relative 'client/trace_id'
 require_relative 'client/udp_sender'
 require_relative 'client/collector'
+require_relative 'client/version'
 
 module Jaeger
   module Client
