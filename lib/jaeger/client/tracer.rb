@@ -72,21 +72,18 @@ module Jaeger
       def parse_context(trace)
         return nil if !trace || trace == ''
 
-        trace_arguments = trace.split(':').map {|arg| arg.to_i(16)}
+        trace_arguments = trace.split(':').map { |arg| arg.to_i(16) }
         return nil if trace_arguments.size != 4
 
         trace_id, span_id, parent_id, flags = trace_arguments
+        return nil if trace_id.zero? || span_id.zero?
 
-        if trace_id != 0 && span_id != 0
-          SpanContext.new(
-            trace_id: trace_id,
-            parent_id: parent_id,
-            span_id: span_id,
-            flags: flags
-          )
-        else
-          nil
-        end
+        SpanContext.new(
+          trace_id: trace_id,
+          parent_id: parent_id,
+          span_id: span_id,
+          flags: flags
+        )
       end
     end
   end

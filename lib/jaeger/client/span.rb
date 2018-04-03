@@ -52,7 +52,7 @@ module Jaeger
       # @param timestamp [Time] time of the log
       # @param fields [Hash] Additional information to log
       def log(timestamp: Time.now, **fields)
-        @logs << {timestamp: timestamp, fields: fields}
+        @logs << { timestamp: timestamp, fields: fields }
       end
 
       # Finish the {Span}
@@ -66,7 +66,7 @@ module Jaeger
 
       def build_binary_annotations
         @tags.map do |name, value|
-          {key: name, value: value.to_s}
+          { key: name, value: value.to_s }
         end
       end
     end

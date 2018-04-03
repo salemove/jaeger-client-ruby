@@ -26,7 +26,7 @@ RSpec.describe Jaeger::Client::SpanContext do
 
     it 'has same its own span id' do
       context = described_class.create_from_parent_context(parent)
-      expect(context.span_id).to_not eq(parent_span_id)
+      expect(context.span_id).not_to eq(parent_span_id)
     end
 
     it 'has parent flags' do

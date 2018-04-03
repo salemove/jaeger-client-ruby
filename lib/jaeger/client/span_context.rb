@@ -37,9 +37,9 @@ module Jaeger
       end
 
       def to_s
-        "#<SpanContext @span_id=#{span_id.to_s(16)} " +
-          "@parent_id=#{parent_id.to_s(16)} " +
-          "@trace_id=#{trace_id.to_s(16)} " +
+        "#<SpanContext @span_id=#{span_id.to_s(16)} " \
+          "@parent_id=#{parent_id.to_s(16)} " \
+          "@trace_id=#{trace_id.to_s(16)} " \
           "@flags=#{flags}>"
       end
     end

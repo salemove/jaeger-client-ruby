@@ -24,7 +24,7 @@ module Jaeger
           )
         ]
         ipv4 = Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }
-        if !ipv4.nil?
+        unless ipv4.nil?
           @tags << Jaeger::Thrift::Tag.new(
             'key' => 'ip',
             'vType' => Jaeger::Thrift::TagType::STRING,

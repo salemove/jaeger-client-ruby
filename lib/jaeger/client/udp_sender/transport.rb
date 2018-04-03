@@ -20,6 +20,7 @@ module Jaeger
         end
 
         def open; end
+
         def close; end
 
         private
@@ -29,7 +30,7 @@ module Jaeger
           @socket.flush
         rescue Errno::ECONNREFUSED
           warn 'Unable to connect to Jaeger Agent'
-        rescue => e
+        rescue StandardError => e
           warn "Unable to send spans: #{e.message}"
         end
       end

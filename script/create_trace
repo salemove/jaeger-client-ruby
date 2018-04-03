@@ -11,24 +11,31 @@ port = ENV['JAEGER_HOST'] || 6831
 tracer1 = Jaeger::Client.build(host: host, port: port.to_i, service_name: 'test-service', flush_interval: 1)
 tracer2 = Jaeger::Client.build(host: host, port: port.to_i, service_name: 'downstream-service', flush_interval: 1)
 
-outer_span = tracer1.start_span('receive request', tags: {
-  'span.kind' => 'server'
-})
+outer_span = tracer1.start_span(
+  'receive request',
+  tags: { 'span.kind' => 'server' }
+)
 sleep 0.1
 outer_span.log(event: 'woop di doop', count: 5)
 sleep 1
 
-inner_span = tracer1.start_span('fetch info from downstream', child_of: outer_span, tags: {
-  'span.kind' => 'client',
-  'peer.service' => 'downstream-service',
-  'peer.ipv4' => '6.6.6.6',
-  'peer.port' => 443
-})
+inner_span = tracer1.start_span(
+  'fetch info from downstream',
+  child_of: outer_span,
+  tags: {
+    'span.kind' => 'client',
+    'peer.service' => 'downstream-service',
+    'peer.ipv4' => '6.6.6.6',
+    'peer.port' => 443
+  }
+)
 sleep 0.3 # emulate network delay
 
-downstream_span = tracer2.start_span('downstream operation', child_of: inner_span, tags: {
-  'span.kind' => 'server'
-})
+downstream_span = tracer2.start_span(
+  'downstream operation',
+  child_of: inner_span,
+  tags: { 'span.kind' => 'server' }
+)
 sleep 0.5
 downstream_span.finish
 
@@ -42,5 +49,4 @@ outer_span.finish
 tracer1.stop
 tracer2.stop
 
-puts "Finished"
-
+puts 'Finished'
