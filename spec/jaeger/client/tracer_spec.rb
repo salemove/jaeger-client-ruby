@@ -90,6 +90,9 @@ describe Jaeger::Client::Tracer do
   end
 
   describe '#extract' do
+    let(:hexa_negative_int64) { 'ffffffffffffffff' } # -1
+    let(:hexa_positive_int64) { '7fffffffffffffff' } # max positive
+
     let(:operation_name) { 'operator-name' }
     let(:trace_id) { '58a515c97fd61fd7' }
     let(:parent_id) { '8e5a8c5509c8dcc1' }
@@ -100,20 +103,56 @@ describe Jaeger::Client::Tracer do
       let(:carrier) { { 'uber-trace-id' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
       let(:span_context) { tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
-      it 'has trace-id' do
-        expect(span_context.trace_id).to eq(trace_id.to_i(16))
-      end
-
-      it 'has parent-id' do
-        expect(span_context.parent_id).to eq(parent_id.to_i(16))
-      end
-
-      it 'has span-id' do
-        expect(span_context.span_id).to eq(span_id.to_i(16))
-      end
-
       it 'has flags' do
         expect(span_context.flags).to eq(flags.to_i(16))
+      end
+
+      context 'when trace-id is a negative int64' do
+        let(:trace_id) { hexa_negative_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.trace_id).to eq(-1)
+        end
+      end
+
+      context 'when trace-id is a positive int64' do
+        let(:trace_id) { hexa_positive_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.trace_id).to eq(2**63 - 1)
+        end
+      end
+
+      context 'when parent-id is a negative int64' do
+        let(:parent_id) { hexa_negative_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.parent_id).to eq(-1)
+        end
+      end
+
+      context 'when parent-id is a positive int64' do
+        let(:parent_id) { hexa_positive_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.parent_id).to eq(2**63 - 1)
+        end
+      end
+
+      context 'when span-id is a negative int64' do
+        let(:span_id) { hexa_negative_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.span_id).to eq(-1)
+        end
+      end
+
+      context 'when span-id is a positive int64' do
+        let(:span_id) { hexa_positive_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.span_id).to eq(2**63 - 1)
+        end
       end
 
       context 'when parent-id is 0' do
@@ -145,20 +184,56 @@ describe Jaeger::Client::Tracer do
       let(:carrier) { { 'HTTP_UBER_TRACE_ID' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
       let(:span_context) { tracer.extract(OpenTracing::FORMAT_RACK, carrier) }
 
-      it 'has trace-id' do
-        expect(span_context.trace_id).to eq(trace_id.to_i(16))
-      end
-
-      it 'has parent-id' do
-        expect(span_context.parent_id).to eq(parent_id.to_i(16))
-      end
-
-      it 'has span-id' do
-        expect(span_context.span_id).to eq(span_id.to_i(16))
-      end
-
       it 'has flags' do
         expect(span_context.flags).to eq(flags.to_i(16))
+      end
+
+      context 'when trace-id is a negative int64' do
+        let(:trace_id) { hexa_negative_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.trace_id).to eq(-1)
+        end
+      end
+
+      context 'when trace-id is a positive int64' do
+        let(:trace_id) { hexa_positive_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.trace_id).to eq(2**63 - 1)
+        end
+      end
+
+      context 'when parent-id is a negative int64' do
+        let(:parent_id) { hexa_negative_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.parent_id).to eq(-1)
+        end
+      end
+
+      context 'when parent-id is a positive int64' do
+        let(:parent_id) { hexa_positive_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.parent_id).to eq(2**63 - 1)
+        end
+      end
+
+      context 'when span-id is a negative int64' do
+        let(:span_id) { hexa_negative_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.span_id).to eq(-1)
+        end
+      end
+
+      context 'when span-id is a positive int64' do
+        let(:span_id) { hexa_positive_int64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.span_id).to eq(2**63 - 1)
+        end
       end
 
       context 'when parent-id is 0' do
