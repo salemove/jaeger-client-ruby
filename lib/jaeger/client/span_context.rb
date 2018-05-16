@@ -13,13 +13,12 @@ module Jaeger
         flags = Flags::SAMPLED
         new(trace_id: trace_id, span_id: span_id, flags: flags)
       end
-
       def self.create_from_parent_context(span_context)
         trace_id = span_context.trace_id
         parent_id = span_context.span_id
         flags = span_context.flags
         span_id = TraceId.generate
-        new(span_id: span_id, parent_id: parent_id, trace_id: trace_id, flags: flags)
+        new(span_id: span_id, parent_id: parent_id, trace_id: trace_id, flags: flags, baggage: span_context.baggage.dup)
       end
 
       attr_reader :span_id, :parent_id, :trace_id, :baggage, :flags

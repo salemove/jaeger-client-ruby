@@ -17,7 +17,7 @@ module Jaeger
         @operation_name = operation_name
         @collector = collector
         @start_time = start_time
-        @tags = tags
+        @tags = tags || {}
         @logs = []
       end
 
