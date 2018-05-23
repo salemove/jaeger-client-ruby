@@ -1,4 +1,7 @@
-# Jaeger::Client
+Jaeger::Client
+================
+[![Gem Version](https://badge.fury.io/rb/jaeger-client.svg)](https://rubygems.org/gems/jaeger-client)
+[![Build Status](https://travis-ci.org/salemove/jaeger-client-ruby.svg)](https://travis-ci.org/salemove/jaeger-client-ruby)
 
 OpenTracing Tracer implementation for Jaeger in Ruby
 
