@@ -8,20 +8,21 @@ module Jaeger
     class Span
       attr_accessor :operation_name
 
-      attr_reader :context, :start_time, :tags, :logs
+      attr_reader :context, :start_time, :references, :tags, :logs
 
       # Creates a new {Span}
       #
       # @param context [SpanContext] the context of the span
-      # @param context [String] the operation name
+      # @param operation_name [String] the operation name
       # @param collector [Collector] span collector
       #
       # @return [Span] a new Span
-      def initialize(context, operation_name, collector, start_time: Time.now, tags: {})
+      def initialize(context, operation_name, collector, start_time: Time.now, references: [], tags: {})
         @context = context
         @operation_name = operation_name
         @collector = collector
         @start_time = start_time
+        @references = references
         @tags = tags.map { |key, value| ThriftTagBuilder.build(key, value) }
         @logs = []
       end

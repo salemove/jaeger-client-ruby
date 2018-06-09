@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+require 'bundler'
+Bundler.setup
+
+require 'jaeger/client'
+
+host = ENV['JAEGER_HOST'] || '127.0.0.1'
+port = ENV['JAEGER_HOST'] || 6831
+
+tracer1 = Jaeger::Client.build(host: host, port: port.to_i, service_name: 'test-service', flush_interval: 1)
+tracer2 = Jaeger::Client.build(host: host, port: port.to_i, service_name: 'downstream-service', flush_interval: 1)
+
+rpc_span = tracer1.start_span(
+  'receive request',
+  tags: { 'span.kind' => 'server' }
+)
+sleep 0.1
+rpc_span.log_kv(event: 'woop di doop', count: 5)
+sleep 1
+
+async_request_span = tracer1.start_span(
+  'request async action',
+  references: [
+    OpenTracing::Reference.child_of(rpc_span.context)
+  ],
+  tags: { 'span.kind' => 'producer' }
+)
+sleep 0.1
+
+async_request_span.finish
+rpc_span.finish
+
+sleep 0.5
+
+async_span = tracer2.start_span(
+  'async span started after rpc span',
+  references: [
+    OpenTracing::Reference.follows_from(async_request_span.context)
+  ],
+  tags: {
+    'span.kind' => 'consumer',
+    'peer.service' => 'downstream-service'
+  }
+)
+sleep 0.3 # emulate network delay
+async_span.finish
+
+tracer1.stop
+tracer2.stop
+
+puts 'Finished'

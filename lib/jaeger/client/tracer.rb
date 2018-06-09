@@ -34,6 +34,12 @@ module Jaeger
       # @param operation_name [String] The operation name for the Span
       # @param child_of [SpanContext, Span] SpanContext that acts as a parent to
       #   the newly-started Span. If a Span instance is provided, its
+      #   context is automatically substituted. See [Reference] for more
+      #   information.
+      #
+      #   If specified, the `references` parameter must be omitted.
+      # @param child_of [SpanContext, Span] SpanContext that acts as a parent to
+      #   the newly-started Span. If a Span instance is provided, its
       #   context is automatically substituted.
       # @param references [Array<Reference>] An array of reference
       #   objects that identify one or more parent SpanContexts.
@@ -52,6 +58,7 @@ module Jaeger
                      **)
         context = prepare_span_context(
           child_of: child_of,
+          references: references,
           ignore_active_scope: ignore_active_scope
         )
         Span.new(
@@ -59,6 +66,7 @@ module Jaeger
           operation_name,
           @collector,
           start_time: start_time,
+          references: references,
           tags: tags.merge(
             :'sampler.type' => @sampler.type,
             :'sampler.param' => @sampler.param
@@ -182,20 +190,39 @@ module Jaeger
         (num & ~mask) - (num & mask)
       end
 
-      def prepare_span_context(child_of:, ignore_active_scope:)
-        if child_of
-          parent_context = child_of.respond_to?(:context) ? child_of.context : child_of
-          return SpanContext.create_from_parent_context(parent_context)
-        end
+      def prepare_span_context(child_of:, references:, ignore_active_scope:)
+        context =
+          context_from_child_of(child_of) ||
+          context_from_references(references) ||
+          context_from_active_scope(ignore_active_scope)
 
-        unless ignore_active_scope
-          active_scope = @scope_manager.active
-          if active_scope
-            return SpanContext.create_from_parent_context(active_scope.span.context)
-          end
+        if context
+          SpanContext.create_from_parent_context(context)
+        else
+          SpanContext.create_parent_context(@sampler)
         end
+      end
 
-        SpanContext.create_parent_context(@sampler)
+      def context_from_child_of(child_of)
+        return nil unless child_of
+        child_of.respond_to?(:context) ? child_of.context : child_of
+      end
+
+      def context_from_references(references)
+        return nil if !references || references.none?
+
+        # Prefer CHILD_OF reference if present
+        ref = references.detect do |reference|
+          reference.type == OpenTracing::Reference::CHILD_OF
+        end
+        (ref || references[0]).context
+      end
+
+      def context_from_active_scope(ignore_active_scope)
+        return if ignore_active_scope
+
+        active_scope = @scope_manager.active
+        active_scope.span.context if active_scope
       end
     end
   end
