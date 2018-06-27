@@ -54,7 +54,7 @@ module Jaeger
 
       def emit_batch(thrift_spans)
         return if thrift_spans.empty?
-        
+
         batch = Jaeger::Thrift::Batch.new(
           'process' => Jaeger::Thrift::Process.new(
             'serviceName' => @service_name,
@@ -62,9 +62,8 @@ module Jaeger
           ),
           'spans' => thrift_spans
         )
+
         @transport.emit_batch(batch)
-      rescue => e
-        puts e
       end
     end
   end

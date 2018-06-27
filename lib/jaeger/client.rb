@@ -21,8 +21,7 @@ module Jaeger
                    port: 6831,
                    service_name:,
                    flush_interval: DEFAULT_FLUSH_INTERVAL,
-                   transport: nil
-    )
+                   transport: nil)
 
       if transport == nil
         transport = ThriftSender::UDPTransport.new(host, port)

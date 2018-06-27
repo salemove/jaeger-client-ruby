@@ -13,6 +13,7 @@ module Jaeger
         flags = Flags::SAMPLED
         new(trace_id: trace_id, span_id: span_id, flags: flags)
       end
+
       def self.create_from_parent_context(span_context)
         trace_id = span_context.trace_id
         parent_id = span_context.span_id
