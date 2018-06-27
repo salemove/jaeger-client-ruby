@@ -2,8 +2,6 @@ $LOAD_PATH.push(File.dirname(__FILE__) + '/../../thrift/gen-rb')
 
 require 'opentracing'
 
-require_relative 'client/scope'
-require_relative 'client/scope_manager'
 require_relative 'client/tracer'
 require_relative 'client/span'
 require_relative 'client/span_context'
