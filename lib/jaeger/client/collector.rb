@@ -17,7 +17,7 @@ module Jaeger
           'spanId' => context.span_id,
           'parentSpanId' => context.parent_id,
           'operationName' => span.operation_name,
-          'references' => [],
+          'references' => build_references(span.references),
           'flags' => context.flags,
           'startTime' => start_ts,
           'duration' => duration,
@@ -31,6 +31,28 @@ module Jaeger
       end
 
       private
+      def build_references(references)
+        references.map do |ref|
+          Jaeger::Thrift::SpanRef.new(
+            'refType' => span_ref_type(ref.type),
+            'traceIdLow' => ref.context.trace_id,
+            'traceIdHigh' => 0,
+            'spanId' => ref.context.span_id
+          )
+        end
+      end
+
+        def span_ref_type(type)
+          case type
+            when OpenTracing::Reference::CHILD_OF
+              Jaeger::Thrift::SpanRefType::CHILD_OF
+            when OpenTracing::Reference::FOLLOWS_FROM
+              Jaeger::Thrift::SpanRefType::FOLLOWS_FROM
+            else
+              warn "Jaeger::Client with format #{type} is not supported yet"
+              nil
+          end
+        end
 
       def build_tags(tags)
         tags.map { |name, value| build_tag(name, value) }

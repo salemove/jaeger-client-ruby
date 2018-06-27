@@ -3,7 +3,7 @@ module Jaeger
     class Span
       attr_accessor :operation_name
 
-      attr_reader :context, :start_time, :tags, :logs
+      attr_reader :context, :start_time, :references, :tags, :logs
 
       # Creates a new {Span}
       #
@@ -12,12 +12,13 @@ module Jaeger
       # @param collector [Collector] span collector
       #
       # @return [Span] a new Span
-      def initialize(context, operation_name, collector, start_time: Time.now, tags: {})
+      def initialize(context, operation_name, collector, start_time: Time.now, references: [], tags: {})
         @context = context
         @operation_name = operation_name
         @collector = collector
         @start_time = start_time
-        @tags = tags
+        @tags = tags || {}
+        @references = Array(references)
         @logs = []
       end
 

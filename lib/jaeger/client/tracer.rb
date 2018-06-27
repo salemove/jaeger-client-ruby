@@ -17,10 +17,11 @@ module Jaeger
       #        the newly-started Span. If a Span instance is provided, its
       #        context is automatically substituted.
       # @param start_time [Time] When the Span started, if not now
+      # @param references [Array] References to assign to the Span at start time
       # @param tags [Hash] Tags to assign to the Span at start time
       #
       # @return [Span] The newly-started Span
-      def start_span(operation_name, child_of: nil, start_time: Time.now, tags: {}, **)
+      def start_span(operation_name, child_of: nil, start_time: Time.now, references: [], tags: {}, **)
         context =
           if child_of
             parent_context = child_of.respond_to?(:context) ? child_of.context : child_of
@@ -28,7 +29,8 @@ module Jaeger
           else
             SpanContext.create_parent_context
           end
-        Span.new(context, operation_name, @collector, start_time: start_time, tags: tags)
+
+          Jaeger::Client::Span.new(context, operation_name, @collector, start_time: start_time, references: references, tags: tags)
       end
 
       # Inject a SpanContext into the given carrier
