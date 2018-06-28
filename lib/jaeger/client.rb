@@ -19,7 +19,8 @@ module Jaeger
                    port: 6831,
                    service_name:,
                    flush_interval: DEFAULT_FLUSH_INTERVAL,
-                   transport: nil)
+                   transport: nil,
+                   flush_span_chunk_limit: 1)
 
       if transport == nil
         transport = ThriftSender::UDPTransport.new(host, port)
@@ -30,7 +31,8 @@ module Jaeger
         service_name: service_name,
         collector: collector,
         flush_interval: flush_interval,
-        transport: transport
+        transport: transport,
+        flush_span_chunk_limit: flush_span_chunk_limit
       )
       sender.start
       Tracer.new(collector, sender)

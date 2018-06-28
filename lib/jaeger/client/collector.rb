@@ -26,8 +26,8 @@ module Jaeger
         )
       end
 
-      def retrieve
-        @buffer.retrieve
+      def retrieve(limit = nil)
+        @buffer.retrieve(limit)
       end
 
       private
@@ -95,11 +95,9 @@ module Jaeger
           end
         end
 
-        def retrieve
+        def retrieve(limit = nil)
           @mutex.synchronize do
-            elements = @buffer.dup
-            @buffer.clear
-            elements
+            @buffer.shift(limit || @buffer.length)
           end
         end
       end

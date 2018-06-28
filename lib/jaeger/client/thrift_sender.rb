@@ -7,11 +7,12 @@ require 'thread'
 module Jaeger
   module Client
     class ThriftSender
-      def initialize(service_name:, collector:, flush_interval:, transport:)
+      def initialize(service_name:, collector:, flush_interval:, transport:, flush_span_chunk_limit: 1)
         @service_name = service_name
         @collector = collector
         @flush_interval = flush_interval
         @transport = transport
+        @flush_span_chunk_limit = flush_span_chunk_limit
 
         @tags = [
           Jaeger::Thrift::Tag.new(
@@ -39,7 +40,11 @@ module Jaeger
         # Sending spans in a separate thread to avoid blocking the main thread.
         @thread = Thread.new do
           loop do
-            emit_batch(@collector.retrieve)
+            loop do
+              data = @collector.retrieve(@flush_span_chunk_limit)
+              break if !data.present?
+              emit_batch(data)
+            end
             sleep @flush_interval
           end
         end
