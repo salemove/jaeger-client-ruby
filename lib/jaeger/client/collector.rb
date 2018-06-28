@@ -17,7 +17,7 @@ module Jaeger
           'spanId' => context.span_id,
           'parentSpanId' => context.parent_id,
           'operationName' => span.operation_name,
-          'references' => [],
+          'references' => build_references(span.references),
           'flags' => context.flags,
           'startTime' => start_ts,
           'duration' => duration,
@@ -26,11 +26,33 @@ module Jaeger
         )
       end
 
-      def retrieve
-        @buffer.retrieve
+      def retrieve(limit = nil)
+        @buffer.retrieve(limit)
       end
 
       private
+      def build_references(references)
+        references.map do |ref|
+          Jaeger::Thrift::SpanRef.new(
+            'refType' => span_ref_type(ref.type),
+            'traceIdLow' => ref.context.trace_id,
+            'traceIdHigh' => 0,
+            'spanId' => ref.context.span_id
+          )
+        end
+      end
+
+        def span_ref_type(type)
+          case type
+            when OpenTracing::Reference::CHILD_OF
+              Jaeger::Thrift::SpanRefType::CHILD_OF
+            when OpenTracing::Reference::FOLLOWS_FROM
+              Jaeger::Thrift::SpanRefType::FOLLOWS_FROM
+            else
+              warn "Jaeger::Client with format #{type} is not supported yet"
+              nil
+          end
+        end
 
       def build_tags(tags)
         tags.map { |name, value| build_tag(name, value) }
@@ -73,11 +95,9 @@ module Jaeger
           end
         end
 
-        def retrieve
+        def retrieve(limit = nil)
           @mutex.synchronize do
-            elements = @buffer.dup
-            @buffer.clear
-            elements
+            @buffer.shift(limit || @buffer.length)
           end
         end
       end

@@ -1,13 +1,27 @@
 module Jaeger
   module Client
-    class UdpSender
-      class Transport
+    class ThriftSender
+      class UDPTransport
         FLAGS = 0
 
-        def initialize(host, port)
-          @socket = UDPSocket.new
+        PROTOCOL_COMPACT = 0
+        PROTOCOL_BINARY = 1
+
+        def initialize(host, port, protocol = PROTOCOL_COMPACT)
+          @socket = ::UDPSocket.new
           @socket.connect(host, port)
           @buffer = ::Thrift::MemoryBufferTransport.new
+          if protocol == PROTOCOL_BINARY
+            protocol = ::Thrift::BinaryProtocol.new(self)
+          else
+            protocol = ::Thrift::CompactProtocol.new(self)
+          end
+
+          @client = Jaeger::Thrift::Agent::Client.new(protocol)
+        end
+
+        def emit_batch(batch)
+          @client.emitBatch(batch)
         end
 
         def write(str)

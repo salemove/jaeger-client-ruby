@@ -7,7 +7,7 @@ require_relative 'client/span'
 require_relative 'client/span_context'
 require_relative 'client/carrier'
 require_relative 'client/trace_id'
-require_relative 'client/udp_sender'
+require_relative 'client/thrift_sender'
 require_relative 'client/collector'
 require_relative 'client/version'
 
@@ -15,14 +15,24 @@ module Jaeger
   module Client
     DEFAULT_FLUSH_INTERVAL = 10
 
-    def self.build(host: '127.0.0.1', port: 6831, service_name:, flush_interval: DEFAULT_FLUSH_INTERVAL)
+    def self.build(host: '127.0.0.1',
+                   port: 6831,
+                   service_name:,
+                   flush_interval: DEFAULT_FLUSH_INTERVAL,
+                   transport: nil,
+                   flush_span_chunk_limit: 1)
+
+      if transport == nil
+        transport = ThriftSender::UDPTransport.new(host, port)
+      end
+
       collector = Collector.new
-      sender = UdpSender.new(
+      sender = ThriftSender.new(
         service_name: service_name,
-        host: host,
-        port: port,
         collector: collector,
-        flush_interval: flush_interval
+        flush_interval: flush_interval,
+        transport: transport,
+        flush_span_chunk_limit: flush_span_chunk_limit
       )
       sender.start
       Tracer.new(collector, sender)

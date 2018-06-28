@@ -19,7 +19,7 @@ module Jaeger
         parent_id = span_context.span_id
         flags = span_context.flags
         span_id = TraceId.generate
-        new(span_id: span_id, parent_id: parent_id, trace_id: trace_id, flags: flags)
+        new(span_id: span_id, parent_id: parent_id, trace_id: trace_id, flags: flags, baggage: span_context.baggage.dup)
       end
 
       attr_reader :span_id, :parent_id, :trace_id, :baggage, :flags

@@ -1,15 +1,18 @@
-require_relative './udp_sender/transport'
+require_relative './thrift_sender/udp_transport'
+require_relative './thrift_sender/http_transport'
 require 'jaeger/thrift/agent'
 require 'socket'
 require 'thread'
 
 module Jaeger
   module Client
-    class UdpSender
-      def initialize(service_name:, host:, port:, collector:, flush_interval:)
+    class ThriftSender
+      def initialize(service_name:, collector:, flush_interval:, transport:, flush_span_chunk_limit: 1)
         @service_name = service_name
         @collector = collector
         @flush_interval = flush_interval
+        @transport = transport
+        @flush_span_chunk_limit = flush_span_chunk_limit
 
         @tags = [
           Jaeger::Thrift::Tag.new(
@@ -31,17 +34,17 @@ module Jaeger
             'vStr' => ipv4.ip_address
           )
         end
-
-        transport = Transport.new(host, port)
-        protocol = ::Thrift::CompactProtocol.new(transport)
-        @client = Jaeger::Thrift::Agent::Client.new(protocol)
       end
 
       def start
         # Sending spans in a separate thread to avoid blocking the main thread.
         @thread = Thread.new do
           loop do
-            emit_batch(@collector.retrieve)
+            loop do
+              data = @collector.retrieve(@flush_span_chunk_limit)
+              break if !data.present?
+              emit_batch(data)
+            end
             sleep @flush_interval
           end
         end
@@ -65,7 +68,7 @@ module Jaeger
           'spans' => thrift_spans
         )
 
-        @client.emitBatch(batch)
+        @transport.emit_batch(batch)
       end
     end
   end
