@@ -4,11 +4,19 @@ module Jaeger
       class UDPTransport
         FLAGS = 0
 
-        def initialize(host, port)
+        PROTOCOL_COMPACT = 0
+        PROTOCOL_BINARY = 1
+
+        def initialize(host, port, protocol = PROTOCOL_COMPACT)
           @socket = ::UDPSocket.new
           @socket.connect(host, port)
           @buffer = ::Thrift::MemoryBufferTransport.new
-          protocol = ::Thrift::CompactProtocol.new(self)
+          if protocol == PROTOCOL_BINARY
+            protocol = ::Thrift::BinaryProtocol.new(self)
+          else
+            protocol = ::Thrift::CompactProtocol.new(self)
+          end
+
           @client = Jaeger::Thrift::Agent::Client.new(protocol)
         end
 
