@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jaeger
   module Client
     # SpanContext holds the data for a span that gets inherited to child spans

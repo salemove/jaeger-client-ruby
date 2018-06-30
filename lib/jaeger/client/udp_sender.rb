@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative './udp_sender/transport'
 require 'jaeger/thrift/agent'
 require 'socket'

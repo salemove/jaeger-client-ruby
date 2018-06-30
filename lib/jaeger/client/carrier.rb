@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jaeger
   module Client
     # Carriers are used for inject and extract operations. A carrier should be a

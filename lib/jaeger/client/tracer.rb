@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jaeger
   module Client
     class Tracer

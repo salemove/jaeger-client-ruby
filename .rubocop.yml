@@ -28,5 +28,11 @@ Metrics/AbcSize:
 Lint/UnusedMethodArgument:
   Enabled: no
 
+Style/FrozenStringLiteralComment:
+  Enabled: yes
+  EnforcedStyle: always
+  Include:
+    - 'lib/**/*'
+
 Metrics/LineLength:
   Max: 120

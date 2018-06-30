@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 $LOAD_PATH.push(File.dirname(__FILE__) + '/../../thrift/gen-rb')
 
 require 'opentracing'
