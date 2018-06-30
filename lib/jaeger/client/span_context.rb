@@ -5,14 +5,15 @@ module Jaeger
     # SpanContext holds the data for a span that gets inherited to child spans
     class SpanContext
       module Flags
+        NONE = 0x00
         SAMPLED = 0x01
         DEBUG = 0x02
       end
 
-      def self.create_parent_context
+      def self.create_parent_context(sampler = Samplers::Const.new(true))
         trace_id = TraceId.generate
         span_id = TraceId.generate
-        flags = Flags::SAMPLED
+        flags = sampler.sample?(trace_id) ? Flags::SAMPLED : Flags::NONE
         new(trace_id: trace_id, span_id: span_id, flags: flags)
       end
 
@@ -32,6 +33,14 @@ module Jaeger
         @trace_id = trace_id
         @baggage = baggage
         @flags = flags
+      end
+
+      def sampled?
+        @flags & Flags::SAMPLED == Flags::SAMPLED
+      end
+
+      def debug?
+        @flags & Flags::DEBUG == Flags::DEBUG
       end
 
       def inspect

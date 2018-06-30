@@ -12,6 +12,7 @@ module Jaeger
       def send_span(span, end_time)
         context = span.context
         start_ts, duration = build_timestamps(span, end_time)
+        return if !context.sampled? && !context.debug?
 
         @buffer << Jaeger::Thrift::Span.new(
           'traceIdLow' => context.trace_id,
