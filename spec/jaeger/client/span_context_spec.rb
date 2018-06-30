@@ -34,4 +34,24 @@ RSpec.describe Jaeger::Client::SpanContext do
       expect(context.flags).to eq(parent_flags)
     end
   end
+
+  describe '.create_from_parent_context' do
+    context 'when sampler returns true' do
+      let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
+
+      it 'marks context as sampled' do
+        context = described_class.create_parent_context(sampler)
+        expect(context).to be_sampled
+      end
+    end
+
+    context 'when sampler returns false' do
+      let(:sampler) { Jaeger::Client::Samplers::Const.new(false) }
+
+      it 'marks context as not sampled' do
+        context = described_class.create_parent_context(sampler)
+        expect(context).not_to be_sampled
+      end
+    end
+  end
 end

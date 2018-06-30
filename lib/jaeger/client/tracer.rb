@@ -3,9 +3,10 @@
 module Jaeger
   module Client
     class Tracer
-      def initialize(collector, sender)
+      def initialize(collector, sender, sampler)
         @collector = collector
         @sender = sender
+        @sampler = sampler
       end
 
       def stop
@@ -28,9 +29,18 @@ module Jaeger
             parent_context = child_of.respond_to?(:context) ? child_of.context : child_of
             SpanContext.create_from_parent_context(parent_context)
           else
-            SpanContext.create_parent_context
+            SpanContext.create_parent_context(@sampler)
           end
-        Span.new(context, operation_name, @collector, start_time: start_time, tags: tags)
+        Span.new(
+          context,
+          operation_name,
+          @collector,
+          start_time: start_time,
+          tags: tags.merge(
+            :'sampler.type' => @sampler.type,
+            :'sampler.param' => @sampler.param
+          )
+        )
       end
 
       # Inject a SpanContext into the given carrier
