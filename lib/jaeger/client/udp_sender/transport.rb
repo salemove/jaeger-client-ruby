@@ -6,7 +6,8 @@ module Jaeger
 
         def initialize(host, port)
           @socket = UDPSocket.new
-          @socket.connect(host, port)
+          @host = host
+          @port = port
           @buffer = ::Thrift::MemoryBufferTransport.new
         end
 
@@ -26,7 +27,7 @@ module Jaeger
         private
 
         def send_bytes(bytes)
-          @socket.send(bytes, FLAGS)
+          @socket.send(bytes, FLAGS, @host, @port)
           @socket.flush
         rescue Errno::ECONNREFUSED
           warn 'Unable to connect to Jaeger Agent'
