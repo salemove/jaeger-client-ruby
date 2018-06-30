@@ -51,10 +51,19 @@ module Jaeger
 
       # Add a log entry to this span
       #
+      # @deprecated Use {#log_kv} instead.
+      def log(*args)
+        warn 'Span#log is deprecated. Please use Span#log_kv instead.'
+        log_kv(*args)
+      end
+
+      # Add a log entry to this span
+      #
       # @param timestamp [Time] time of the log
       # @param fields [Hash] Additional information to log
-      def log(timestamp: Time.now, **fields)
+      def log_kv(timestamp: Time.now, **fields)
         @logs << { timestamp: timestamp, fields: fields }
+        nil
       end
 
       # Finish the {Span}

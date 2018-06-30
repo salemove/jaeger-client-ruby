@@ -16,6 +16,9 @@ RSpec/NestedGroups:
 RSpec/ExampleLength:
   Enabled: no
 
+RSpec/MultipleExpectations:
+  Enabled: no
+
 Metrics/BlockLength:
   Enabled: no
 

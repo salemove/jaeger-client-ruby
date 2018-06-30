@@ -16,7 +16,7 @@ outer_span = tracer1.start_span(
   tags: { 'span.kind' => 'server' }
 )
 sleep 0.1
-outer_span.log(event: 'woop di doop', count: 5)
+outer_span.log_kv(event: 'woop di doop', count: 5)
 sleep 1
 
 inner_span = tracer1.start_span(
