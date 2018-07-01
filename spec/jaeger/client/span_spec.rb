@@ -30,7 +30,7 @@ RSpec.describe Jaeger::Client::Span do
 
       expect(span.logs.count).to eq(1)
       thrift_log = span.logs[0]
-      expect(thrift_log.timestamp).to eq(timestamp.to_f * 1_000_000)
+      expect(thrift_log.timestamp).to eq((timestamp.to_f * 1_000_000).to_i)
       expect(thrift_log.fields).to match(expected_thrift_fields)
     end
   end
