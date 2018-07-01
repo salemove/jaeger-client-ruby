@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'span/thrift_tag_builder'
+require_relative 'span/thrift_log_builder'
+
 module Jaeger
   module Client
     class Span
@@ -19,7 +22,7 @@ module Jaeger
         @operation_name = operation_name
         @collector = collector
         @start_time = start_time
-        @tags = tags
+        @tags = tags.map { |key, value| ThriftTagBuilder.build(key, value) }
         @logs = []
       end
 
@@ -29,7 +32,8 @@ module Jaeger
       # @param value [String, Numeric, Boolean] the value of the tag. If it's not
       # a String, Numeric, or Boolean it will be encoded with to_s
       def set_tag(key, value)
-        @tags = @tags.merge(key => value)
+        # Using Thrift::Tag to avoid unnecessary memory allocations
+        @tags << ThriftTagBuilder.build(key, value)
       end
 
       # Set a baggage item on the span
@@ -62,7 +66,8 @@ module Jaeger
       # @param timestamp [Time] time of the log
       # @param fields [Hash] Additional information to log
       def log_kv(timestamp: Time.now, **fields)
-        @logs << { timestamp: timestamp, fields: fields }
+        # Using Thrift::Log to avoid unnecessary memory allocations
+        @logs << ThriftLogBuilder.build(timestamp, fields)
         nil
       end
 
@@ -71,14 +76,6 @@ module Jaeger
       # @param end_time [Time] custom end time, if not now
       def finish(end_time: Time.now)
         @collector.send_span(self, end_time)
-      end
-
-      private
-
-      def build_binary_annotations
-        @tags.map do |name, value|
-          { key: name, value: value.to_s }
-        end
       end
     end
   end

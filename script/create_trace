@@ -29,6 +29,7 @@ inner_span = tracer1.start_span(
     'peer.port' => 443
   }
 )
+inner_span.set_tag('error', false)
 sleep 0.3 # emulate network delay
 
 downstream_span = tracer2.start_span(

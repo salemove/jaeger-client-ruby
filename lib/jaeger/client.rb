@@ -3,6 +3,7 @@
 $LOAD_PATH.push(File.dirname(__FILE__) + '/../../thrift/gen-rb')
 
 require 'opentracing'
+require 'jaeger/thrift/agent'
 
 require_relative 'client/tracer'
 require_relative 'client/span'
