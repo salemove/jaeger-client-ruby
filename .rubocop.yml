@@ -28,6 +28,12 @@ Metrics/MethodLength:
 Metrics/AbcSize:
   Enabled: no
 
+Metrics/ClassLength:
+  Enabled: no
+
+Metrics/ParameterLists:
+  Enabled: no
+
 Lint/UnusedMethodArgument:
   Enabled: no
 
