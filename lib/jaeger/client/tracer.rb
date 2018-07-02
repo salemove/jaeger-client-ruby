@@ -10,6 +10,15 @@ module Jaeger
         @scope_manager = ScopeManager.new
       end
 
+      def restart
+        stop
+        start
+      end
+
+      def start
+        @sender.start
+      end
+
       def stop
         @sender.stop
       end
