@@ -29,8 +29,8 @@ module Jaeger
         )
       end
 
-      def retrieve
-        @buffer.retrieve
+      def retrieve(limit = nil, blocking = true)
+        @buffer.retrieve(limit, blocking)
       end
 
       private
@@ -65,24 +65,35 @@ module Jaeger
         end
       end
 
+      # https://vaneyckt.io/posts/ruby_concurrency_in_praise_of_condition_variables/
       class Buffer
         def initialize
           @buffer = []
           @mutex = Mutex.new
+          @cond_var = ConditionVariable.new
         end
 
         def <<(element)
           @mutex.synchronize do
             @buffer << element
+            @cond_var.signal
             true
           end
         end
 
-        def retrieve
+        def length
+          @buffer.length
+        end
+
+        def retrieve(limit = nil, blocking = true)
           @mutex.synchronize do
-            elements = @buffer.dup
-            @buffer.clear
-            elements
+            if blocking
+              while @buffer.empty?
+                @cond_var.wait(@mutex)
+              end
+            end
+
+            @buffer.shift(limit || @buffer.length)
           end
         end
       end

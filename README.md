@@ -30,6 +30,24 @@ end
 
 See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more examples.
 
+### Unicorn/Puma/Passanger 
+In case and you're using Unicorn/Puma/Passanger with `preload_app` set to `true`, make sure to restart the UDPSender. You can do so by invoking the following method:
+
+```OpenTracing.global_tracer.restart```
+
+#### Unicorn example
+
+```unicorn.rb
+...
+after_fork do |server, worker|
+    ...
+  defined?(OpenTracing.global_tracer)
+    OpenTracing.global_tracer.restart
+end
+
+```
+
+
 ### Samplers
 
 #### Const sampler

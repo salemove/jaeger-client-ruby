@@ -7,10 +7,10 @@ require 'thread'
 module Jaeger
   module Client
     class UdpSender
-      def initialize(service_name:, host:, port:, collector:, flush_interval:)
+      def initialize(service_name:, host:, port:, collector: , flush_span_chunk_limit:)
         @service_name = service_name
         @collector = collector
-        @flush_interval = flush_interval
+        @flush_span_chunk_limit = flush_span_chunk_limit
 
         @tags = [
           Jaeger::Thrift::Tag.new(
@@ -42,15 +42,23 @@ module Jaeger
         # Sending spans in a separate thread to avoid blocking the main thread.
         @thread = Thread.new do
           loop do
-            emit_batch(@collector.retrieve)
-            sleep @flush_interval
+              spans = @collector.retrieve(@flush_span_chunk_limit)
+              while !spans.empty?
+                emit_batch(spans)
+                # There is need to wait for a signal, lets will empty the queue!
+                spans = @collector.retrieve(@flush_span_chunk_limit, false)
+              end
           end
         end
       end
 
       def stop
         @thread.terminate if @thread
-        emit_batch(@collector.retrieve)
+        loop do # Continue until there is no more information left in queue
+          spans = @collector.retrieve(@flush_span_chunk_limit, false)
+          break if spans.empty?
+          emit_batch(spans)
+        end
       end
 
       private
