@@ -7,10 +7,11 @@ require 'thread'
 module Jaeger
   module Client
     class UdpSender
-      def initialize(service_name:, host:, port:, collector:, flush_interval:)
+      def initialize(service_name:, host:, port:, collector:, flush_interval:, logger:)
         @service_name = service_name
         @collector = collector
         @flush_interval = flush_interval
+        @logger = logger
 
         @tags = [
           Jaeger::Thrift::Tag.new(
@@ -67,6 +68,14 @@ module Jaeger
         )
 
         @client.emitBatch(batch)
+      rescue StandardError => error
+        log_error(error, batch)
+      end
+
+      def log_error(error, failed_batch)
+        return unless @logger
+
+        @logger.error("[jaeger-client] Failure while sending batch: #{failed_batch.inspect} with error: #{error}")
       end
     end
   end
