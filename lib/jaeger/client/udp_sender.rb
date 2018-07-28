@@ -7,10 +7,11 @@ require 'thread'
 module Jaeger
   module Client
     class UdpSender
-      def initialize(service_name:, host:, port:, collector:, flush_interval:)
+      def initialize(service_name:, host:, port:, collector:, flush_interval:, logger:)
         @service_name = service_name
         @collector = collector
         @flush_interval = flush_interval
+        @logger = logger
 
         @tags = [
           Jaeger::Thrift::Tag.new(
@@ -67,6 +68,8 @@ module Jaeger
         )
 
         @client.emitBatch(batch)
+      rescue StandardError => error
+        @logger.error("Failure while sending a batch of spans: #{error}")
       end
     end
   end
