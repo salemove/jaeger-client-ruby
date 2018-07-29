@@ -6,6 +6,30 @@ describe Jaeger::Client::Tracer do
   let(:sender) { spy }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
 
+  context 'after #extract and #inject' do
+    UBER_TRACE_IDS = %w[
+      c94f3977ee9a073:69548f7c197ab707:10bc37238fcf6732:1
+      7ee9a073:69548f7c197ab707:10bc37238fcf6732:1
+      ffffffffffffffff:69548f7c197ab707:10bc37238fcf6732:1
+      -1:69548f7c197ab707:10bc37238fcf6732:1
+      -10000000000000001:69548f7c197ab707:10bc37238fcf6732:1
+      7fffffffffffffff:69548f7c197ab707:10bc37238fcf6732:1
+      5288f24bd7783293:69548f7c197ab707:10bc37238fcf6732:1
+      6e7c7815b3ba63b9dd8c8687003a4ff1:69548f7c197ab707:10bc37238fcf6732:1
+      7815b3ba63b9dd8c8687003a4ff1:69548f7c197ab707:10bc37238fcf6732:1
+    ]
+
+    UBER_TRACE_IDS.each do |uti|
+      it "uber-trace-id: #{uti} is the same" do
+        carrier = { 'uber-trace-id' => uti.dup }
+        span_context = tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier)
+        tracer.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier)
+
+        expect(carrier['uber-trace-id']).to eq(uti)
+      end
+    end
+  end
+
   describe '#start_span' do
     let(:operation_name) { 'operator-name' }
 
@@ -210,7 +234,7 @@ describe Jaeger::Client::Tracer do
         let(:trace_id) { hexa_negative_int64 }
 
         it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(-1)
+          expect(span_context.trace_id).to eq(hexa_negative_int64.to_i(16))
         end
       end
 
@@ -226,7 +250,7 @@ describe Jaeger::Client::Tracer do
         let(:parent_id) { hexa_negative_int64 }
 
         it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(-1)
+          expect(span_context.parent_id).to eq(hexa_negative_int64.to_i(16))
         end
       end
 
@@ -242,7 +266,7 @@ describe Jaeger::Client::Tracer do
         let(:span_id) { hexa_negative_int64 }
 
         it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(-1)
+          expect(span_context.span_id).to eq(hexa_negative_int64.to_i(16))
         end
       end
 
@@ -291,7 +315,7 @@ describe Jaeger::Client::Tracer do
         let(:trace_id) { hexa_negative_int64 }
 
         it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(-1)
+          expect(span_context.trace_id).to eq(hexa_negative_int64.to_i(16))
         end
       end
 
@@ -307,7 +331,7 @@ describe Jaeger::Client::Tracer do
         let(:parent_id) { hexa_negative_int64 }
 
         it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(-1)
+          expect(span_context.parent_id).to eq(hexa_negative_int64.to_i(16))
         end
       end
 
@@ -323,7 +347,7 @@ describe Jaeger::Client::Tracer do
         let(:span_id) { hexa_negative_int64 }
 
         it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(-1)
+          expect(span_context.span_id).to eq(hexa_negative_int64.to_i(16))
         end
       end
 

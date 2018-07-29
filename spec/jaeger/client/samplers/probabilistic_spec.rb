@@ -16,12 +16,12 @@ RSpec.describe Jaeger::Client::Samplers::Probabilistic do
     let(:rate) { 0.5 }
 
     it 'returns false for traces over the boundary' do
-      trace_id = (0.51 * (2**63 - 1)).to_i
+      trace_id = (0.51 * (2**64 - 1)).to_i
       expect(sampler.sample?(trace_id)).to eq(false)
     end
 
     it 'returns true for traces under the boundary' do
-      trace_id = (0.49 * (2**63 - 1)).to_i
+      trace_id = (0.49 * (2**64 - 1)).to_i
       expect(sampler.sample?(trace_id)).to eq(true)
     end
   end
