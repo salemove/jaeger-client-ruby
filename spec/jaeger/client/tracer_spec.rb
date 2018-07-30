@@ -6,7 +6,7 @@ describe Jaeger::Client::Tracer do
   let(:sender) { spy }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
 
-  context 'after #extract and #inject' do
+  context 'when using #extract and #inject' do
     UBER_TRACE_IDS = %w[
       c94f3977ee9a073:69548f7c197ab707:10bc37238fcf6732:1
       7ee9a073:69548f7c197ab707:10bc37238fcf6732:1
@@ -17,7 +17,7 @@ describe Jaeger::Client::Tracer do
       5288f24bd7783293:69548f7c197ab707:10bc37238fcf6732:1
       6e7c7815b3ba63b9dd8c8687003a4ff1:69548f7c197ab707:10bc37238fcf6732:1
       7815b3ba63b9dd8c8687003a4ff1:69548f7c197ab707:10bc37238fcf6732:1
-    ]
+    ].freeze
 
     UBER_TRACE_IDS.each do |uti|
       it "uber-trace-id: #{uti} is the same" do

@@ -46,11 +46,11 @@ RSpec.describe Jaeger::Client::Collector do
       end
     end
 
-    context 'parsing ids for thrift specific sizes' do
+    context 'when parsing ids for thrift specific size' do
       # on 64-bits you can actually put 18446744073709551616 numbers
       # thrift support sending -9223372036854775808 to 9223372036854775807
-      let(:hexa_negative_int64) { 18446744073709551615 } # -1
-      let(:hexa_positive_int64) { 9223372036854775807 } # max positive
+      let(:hexa_negative_int64) { 18_446_744_073_709_551_615 } # -1
+      let(:hexa_positive_int64) { 9_223_372_036_854_775_807 } # max positive
 
       before do
         allow(Jaeger::Thrift::Span).to receive(:new).and_call_original

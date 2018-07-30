@@ -6,7 +6,7 @@ module Jaeger
     class SpanContext
       MAX_SIGNED_ID = (1 << 63) - 1
       MAX_UNSIGNED_ID = (1 << 64)
-      ID_ATTRIBUTES = %i[span_id parent_id trace_id]
+      ID_ATTRIBUTES = %i[span_id parent_id trace_id].freeze
 
       module Flags
         NONE = 0x00
@@ -33,7 +33,7 @@ module Jaeger
 
       ID_ATTRIBUTES.each do |attribute|
         define_method "thrift_#{attribute}" do
-          id_to_thrift_int(self.public_send(attribute))
+          id_to_thrift_int(public_send(attribute))
         end
       end
 
@@ -69,7 +69,6 @@ module Jaeger
       def id_to_thrift_int(id)
         return unless id
 
-        puts id
         id -= MAX_UNSIGNED_ID if id > MAX_SIGNED_ID
         id
       end
