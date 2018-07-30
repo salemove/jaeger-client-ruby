@@ -15,10 +15,10 @@ module Jaeger
         return if !context.sampled? && !context.debug?
 
         @buffer << Jaeger::Thrift::Span.new(
-          'traceIdLow' => context.trace_id,
+          'traceIdLow' => context.thrift_trace_id,
           'traceIdHigh' => 0,
-          'spanId' => context.span_id,
-          'parentSpanId' => context.parent_id,
+          'spanId' => context.thrift_span_id,
+          'parentSpanId' => context.thrift_parent_id,
           'operationName' => span.operation_name,
           'references' => build_references(span.references || []),
           'flags' => context.flags,
@@ -39,9 +39,9 @@ module Jaeger
         references.map do |ref|
           Jaeger::Thrift::SpanRef.new(
             'refType' => span_ref_type(ref.type),
-            'traceIdLow' => ref.context.trace_id,
+            'traceIdLow' => ref.context.thrift_trace_id,
             'traceIdHigh' => 0,
-            'spanId' => ref.context.span_id
+            'spanId' => ref.context.thrift_span_id
           )
         end
       end
