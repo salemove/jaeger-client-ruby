@@ -43,15 +43,16 @@ module Jaeger
         @flags & Flags::DEBUG == Flags::DEBUG
       end
 
-      def inspect
-        to_s
+      def to_trace_id
+        @to_trace_id ||= @trace_id.to_s(16)
       end
 
-      def to_s
-        "#<SpanContext @span_id=#{span_id.to_s(16)} " \
-          "@parent_id=#{parent_id.to_s(16)} " \
-          "@trace_id=#{trace_id.to_s(16)} " \
-          "@flags=#{flags}>"
+      def to_parent_id
+        @to_parent_id ||= @parent_id.zero? ? nil : @parent_id.to_s(16)
+      end
+
+      def to_span_id
+        @to_span_id ||= @span_id.to_s(16)
       end
     end
   end

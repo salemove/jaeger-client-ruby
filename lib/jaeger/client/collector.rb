@@ -15,10 +15,10 @@ module Jaeger
         return if !context.sampled? && !context.debug?
 
         @buffer << Jaeger::Thrift::Span.new(
-          'traceIdLow' => context.trace_id,
+          'traceIdLow' => TraceId.uint64_id_to_int64(context.trace_id),
           'traceIdHigh' => 0,
-          'spanId' => context.span_id,
-          'parentSpanId' => context.parent_id,
+          'spanId' => TraceId.uint64_id_to_int64(context.span_id),
+          'parentSpanId' => TraceId.uint64_id_to_int64(context.parent_id),
           'operationName' => span.operation_name,
           'references' => build_references(span.references || []),
           'flags' => context.flags,

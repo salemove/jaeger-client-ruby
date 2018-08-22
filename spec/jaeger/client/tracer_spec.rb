@@ -189,8 +189,8 @@ describe Jaeger::Client::Tracer do
   end
 
   describe '#extract' do
-    let(:hexa_negative_int64) { 'ffffffffffffffff' } # -1
-    let(:hexa_positive_int64) { '7fffffffffffffff' } # max positive
+    let(:hexa_max_uint64) { 'ff' * 8 }
+    let(:max_uint64) { 2**64 - 1 }
 
     let(:operation_name) { 'operator-name' }
     let(:trace_id) { '58a515c97fd61fd7' }
@@ -206,51 +206,27 @@ describe Jaeger::Client::Tracer do
         expect(span_context.flags).to eq(flags.to_i(16))
       end
 
-      context 'when trace-id is a negative int64' do
-        let(:trace_id) { hexa_negative_int64 }
+      context 'when trace-id is a max uint64' do
+        let(:trace_id) { hexa_max_uint64 }
 
         it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(-1)
+          expect(span_context.trace_id).to eq(max_uint64)
         end
       end
 
-      context 'when trace-id is a positive int64' do
-        let(:trace_id) { hexa_positive_int64 }
+      context 'when parent-id is a max uint64' do
+        let(:parent_id) { hexa_max_uint64 }
 
         it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(2**63 - 1)
+          expect(span_context.parent_id).to eq(max_uint64)
         end
       end
 
-      context 'when parent-id is a negative int64' do
-        let(:parent_id) { hexa_negative_int64 }
+      context 'when span-id is a max uint64' do
+        let(:span_id) { hexa_max_uint64 }
 
         it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(-1)
-        end
-      end
-
-      context 'when parent-id is a positive int64' do
-        let(:parent_id) { hexa_positive_int64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(2**63 - 1)
-        end
-      end
-
-      context 'when span-id is a negative int64' do
-        let(:span_id) { hexa_negative_int64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(-1)
-        end
-      end
-
-      context 'when span-id is a positive int64' do
-        let(:span_id) { hexa_positive_int64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(2**63 - 1)
+          expect(span_context.span_id).to eq(max_uint64)
         end
       end
 
@@ -287,51 +263,27 @@ describe Jaeger::Client::Tracer do
         expect(span_context.flags).to eq(flags.to_i(16))
       end
 
-      context 'when trace-id is a negative int64' do
-        let(:trace_id) { hexa_negative_int64 }
+      context 'when trace-id is a max uint64' do
+        let(:trace_id) { hexa_max_uint64 }
 
         it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(-1)
+          expect(span_context.trace_id).to eq(max_uint64)
         end
       end
 
-      context 'when trace-id is a positive int64' do
-        let(:trace_id) { hexa_positive_int64 }
+      context 'when parent-id is a max uint64' do
+        let(:parent_id) { hexa_max_uint64 }
 
         it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(2**63 - 1)
+          expect(span_context.parent_id).to eq(max_uint64)
         end
       end
 
-      context 'when parent-id is a negative int64' do
-        let(:parent_id) { hexa_negative_int64 }
+      context 'when span-id is a max uint64' do
+        let(:span_id) { hexa_max_uint64 }
 
         it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(-1)
-        end
-      end
-
-      context 'when parent-id is a positive int64' do
-        let(:parent_id) { hexa_positive_int64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(2**63 - 1)
-        end
-      end
-
-      context 'when span-id is a negative int64' do
-        let(:span_id) { hexa_negative_int64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(-1)
-        end
-      end
-
-      context 'when span-id is a positive int64' do
-        let(:span_id) { hexa_positive_int64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(2**63 - 1)
+          expect(span_context.span_id).to eq(max_uint64)
         end
       end
 

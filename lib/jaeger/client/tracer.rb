@@ -167,24 +167,18 @@ module Jaeger
       def parse_context(trace)
         return nil if !trace || trace == ''
 
-        trace_arguments = trace.split(':').map { |arg| arg.to_i(16) }
+        trace_arguments = trace.split(':').map(&TraceId.method(:base16_hex_id_to_uint64))
         return nil if trace_arguments.size != 4
 
         trace_id, span_id, parent_id, flags = trace_arguments
         return nil if trace_id.zero? || span_id.zero?
 
         SpanContext.new(
-          trace_id: to_signed_int(trace_id, 64),
-          parent_id: to_signed_int(parent_id, 64),
-          span_id: to_signed_int(span_id, 64),
+          trace_id: trace_id,
+          parent_id: parent_id,
+          span_id: span_id,
           flags: flags
         )
-      end
-
-      def to_signed_int(num, bits)
-        # Using two's complement
-        mask = 2**(bits - 1)
-        (num & ~mask) - (num & mask)
       end
 
       def prepare_span_context(child_of:, references:, ignore_active_scope:)
