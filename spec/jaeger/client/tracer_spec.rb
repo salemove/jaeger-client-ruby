@@ -1,9 +1,8 @@
 require 'spec_helper'
 
 describe Jaeger::Client::Tracer do
-  let(:tracer) { described_class.new(collector, sender, sampler) }
-  let(:collector) { instance_spy(Jaeger::Client::Collector) }
-  let(:sender) { spy }
+  let(:tracer) { described_class.new(reporter, sampler) }
+  let(:reporter) { instance_spy(Jaeger::Client::AsyncReporter) }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
 
   describe '#start_span' do

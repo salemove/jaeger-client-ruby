@@ -8,19 +8,19 @@ module Jaeger
     class Span
       attr_accessor :operation_name
 
-      attr_reader :context, :start_time, :references, :tags, :logs
+      attr_reader :context, :start_time, :end_time, :references, :tags, :logs
 
       # Creates a new {Span}
       #
       # @param context [SpanContext] the context of the span
       # @param operation_name [String] the operation name
-      # @param collector [Collector] span collector
+      # @param reporter [#report] span reporter
       #
       # @return [Span] a new Span
-      def initialize(context, operation_name, collector, start_time: Time.now, references: [], tags: {})
+      def initialize(context, operation_name, reporter, start_time: Time.now, references: [], tags: {})
         @context = context
         @operation_name = operation_name
-        @collector = collector
+        @reporter = reporter
         @start_time = start_time
         @references = references
         @tags = tags.map { |key, value| ThriftTagBuilder.build(key, value) }
@@ -76,7 +76,8 @@ module Jaeger
       #
       # @param end_time [Time] custom end time, if not now
       def finish(end_time: Time.now)
-        @collector.send_span(self, end_time)
+        @end_time = end_time
+        @reporter.report(self)
       end
     end
   end

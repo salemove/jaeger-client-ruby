@@ -3,15 +3,10 @@
 module Jaeger
   module Client
     class Tracer
-      def initialize(collector, sender, sampler)
-        @collector = collector
-        @sender = sender
+      def initialize(reporter, sampler)
+        @reporter = reporter
         @sampler = sampler
         @scope_manager = ScopeManager.new
-      end
-
-      def stop
-        @sender.stop
       end
 
       # @return [ScopeManager] the current ScopeManager, which may be a no-op
@@ -61,7 +56,7 @@ module Jaeger
         Span.new(
           context,
           operation_name,
-          @collector,
+          @reporter,
           start_time: start_time,
           references: references,
           tags: tags.merge(

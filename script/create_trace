@@ -47,7 +47,6 @@ inner_span.finish
 sleep 0.1 # doing something with fetched info
 outer_span.finish
 
-tracer1.stop
-tracer2.stop
+sleep 2
 
 puts 'Finished'

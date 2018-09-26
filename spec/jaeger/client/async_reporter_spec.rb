@@ -1,10 +1,11 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Collector do
-  let(:collector) { described_class.new }
+RSpec.describe Jaeger::Client::AsyncReporter do
+  let(:reporter) { described_class.new(sender) }
+  let(:sender) { spy }
   let(:operation_name) { 'op-name' }
 
-  describe '#send_span' do
+  describe '#report' do
     let(:context) do
       Jaeger::Client::SpanContext.new(
         trace_id: Jaeger::Client::TraceId.generate,
@@ -12,14 +13,15 @@ RSpec.describe Jaeger::Client::Collector do
         flags: flags
       )
     end
-    let(:span) { Jaeger::Client::Span.new(context, operation_name, collector) }
+    let(:span) { Jaeger::Client::Span.new(context, operation_name, reporter) }
 
     context 'when span has debug mode enabled' do
       let(:flags) { Jaeger::Client::SpanContext::Flags::DEBUG }
 
       it 'buffers the span' do
-        collector.send_span(span, Time.now)
-        expect(collector.retrieve).not_to be_empty
+        reporter.report(span)
+        reporter.flush
+        expect(sender).to have_received(:send_spans).once
       end
     end
 
@@ -27,8 +29,9 @@ RSpec.describe Jaeger::Client::Collector do
       let(:flags) { Jaeger::Client::SpanContext::Flags::SAMPLED }
 
       it 'buffers the span' do
-        collector.send_span(span, Time.now)
-        expect(collector.retrieve).not_to be_empty
+        reporter.report(span)
+        reporter.flush
+        expect(sender).to have_received(:send_spans).once
       end
     end
 
@@ -36,8 +39,9 @@ RSpec.describe Jaeger::Client::Collector do
       let(:flags) { Jaeger::Client::SpanContext::Flags::NONE }
 
       it 'does not buffer the span' do
-        collector.send_span(span, Time.now)
-        expect(collector.retrieve).to be_empty
+        reporter.report(span)
+        reporter.flush
+        expect(sender).not_to have_received(:send_spans)
       end
     end
   end

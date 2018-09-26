@@ -46,7 +46,6 @@ async_span = tracer2.start_span(
 sleep 0.3 # emulate network delay
 async_span.finish
 
-tracer1.stop
-tracer2.stop
+sleep 2
 
 puts 'Finished'
