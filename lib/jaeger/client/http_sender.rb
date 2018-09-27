@@ -12,7 +12,7 @@ module Jaeger
         @uri = URI(host)
         @uri.port = port
         @uri.path = endpoint
-        @uri.query = "format=jaeger.thrift"
+        @uri.query = 'format=jaeger.thrift'
 
         @transport = ::Thrift::HTTPClientTransport.new(@uri.to_s)
 
@@ -22,7 +22,7 @@ module Jaeger
       def send_spans(spans)
         batch = @encoder.encode(spans)
         @transport.write(::Thrift::Serializer.new.serialize(batch))
-        @transport.flush()
+        @transport.flush
       rescue StandardError => error
         @logger.error("Failure while sending a batch of spans: #{error}")
       end

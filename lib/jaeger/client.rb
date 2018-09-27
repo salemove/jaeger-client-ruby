@@ -32,7 +32,7 @@ module Jaeger
                    sender: nil)
       encoder = Encoders::ThriftEncoder.new(service_name: service_name)
 
-      if sender == nil
+      if sender.nil?
         sender = UdpSender.new(host: host, port: port, encoder: encoder, logger: logger)
       end
 
