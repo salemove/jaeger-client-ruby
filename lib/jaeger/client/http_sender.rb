@@ -5,7 +5,7 @@ require 'logger'
 module Jaeger
   module Client
     class HttpSender
-      def initialize(url:, headers:, encoder:, logger: Logger.new(STDOUT))
+      def initialize(url:, headers: {}, encoder:, logger: Logger.new(STDOUT))
         @encoder = encoder
         @logger = logger
 

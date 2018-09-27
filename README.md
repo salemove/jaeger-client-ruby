@@ -28,6 +28,18 @@ OpenTracing.start_active_span('span name') do
 end
 ```
 
+The tracer can also take an externally configured sender. For example, the `HttpSender` can be configured with a different endpoint and headers for authentication.
+```ruby
+require 'jaeger/client'
+require 'jaeger/client/http_sender'
+
+headers = { "auth_token" => token }
+encoder = Jaeger::Client::Encoders::ThriftEncoder.new(service_name: "service_name")
+sender = Jaeger::Client::HttpSender.new(url: "http://localhost:14268/api/traces", headers: headers, encoder: encoder)
+
+OpenTracing.global_tracer = Jaeger::Client.build(service_name: "service_name", sender: sender)
+```
+
 See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more examples.
 
 ### Samplers
