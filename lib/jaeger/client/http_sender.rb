@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative './http_sender/transport'
+require 'logger'
 
 module Jaeger
   module Client
-    module HttpSender
-      def initialize(host:, port:, endpoint:, headers:, encoder:, logger:)
+    class HttpSender
+      def initialize(host:, port:, endpoint:, headers:, encoder:, logger: Logger.new(STDOUT))
         @encoder = encoder
         @logger = logger
 

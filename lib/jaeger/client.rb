@@ -28,9 +28,14 @@ module Jaeger
                    service_name:,
                    flush_interval: DEFAULT_FLUSH_INTERVAL,
                    sampler: Samplers::Const.new(true),
-                   logger: Logger.new(STDOUT))
+                   logger: Logger.new(STDOUT),
+                   sender: nil)
       encoder = Encoders::ThriftEncoder.new(service_name: service_name)
-      sender = UdpSender.new(host: host, port: port, encoder: encoder, logger: logger)
+
+      if sender == nil
+        sender = UdpSender.new(host: host, port: port, encoder: encoder, logger: logger)
+      end
+
       reporter = AsyncReporter.create(sender: sender, flush_interval: flush_interval)
       Tracer.new(reporter, sampler)
     end
