@@ -5,13 +5,11 @@ require 'logger'
 module Jaeger
   module Client
     class HttpSender
-      def initialize(host:, port:, endpoint:, headers:, encoder:, logger: Logger.new(STDOUT))
+      def initialize(url:, headers:, encoder:, logger: Logger.new(STDOUT))
         @encoder = encoder
         @logger = logger
 
-        @uri = URI(host)
-        @uri.port = port
-        @uri.path = endpoint
+        @uri = URI(url)
         @uri.query = 'format=jaeger.thrift'
 
         @transport = ::Thrift::HTTPClientTransport.new(@uri.to_s)
