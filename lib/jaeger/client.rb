@@ -18,6 +18,8 @@ require_relative 'client/async_reporter'
 require_relative 'client/version'
 require_relative 'client/samplers'
 require_relative 'client/encoders/thrift_encoder'
+require_relative 'client/propagation_codec/b3_codec'
+require_relative 'client/propagation_codec/jaeger_codec'
 
 module Jaeger
   module Client
@@ -29,7 +31,8 @@ module Jaeger
                    flush_interval: DEFAULT_FLUSH_INTERVAL,
                    sampler: Samplers::Const.new(true),
                    logger: Logger.new(STDOUT),
-                   sender: nil)
+                   sender: nil,
+                   propagation_codec: Jaeger::Client::PropagationCodec::JaegerCodec)
       encoder = Encoders::ThriftEncoder.new(service_name: service_name)
 
       if sender.nil?
@@ -37,7 +40,8 @@ module Jaeger
       end
 
       reporter = AsyncReporter.create(sender: sender, flush_interval: flush_interval)
-      Tracer.new(reporter, sampler)
+
+      Tracer.new(reporter, sampler, propagation_codec)
     end
   end
 end
