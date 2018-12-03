@@ -1,9 +1,10 @@
 require 'spec_helper'
 
 describe Jaeger::Client::Tracer do
-  let(:tracer) { described_class.new(reporter, sampler) }
+  let(:tracer) { described_class.new(reporter, sampler, codec) }
   let(:reporter) { instance_spy(Jaeger::Client::AsyncReporter) }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
+  let(:codec) { instance_spy(Jaeger::Client::PropagationCodec::JaegerCodec) }
 
   describe '#start_span' do
     let(:operation_name) { 'operator-name' }
@@ -174,15 +175,8 @@ describe Jaeger::Client::Tracer do
     context 'when FORMAT_TEXT_MAP' do
       before { tracer.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
-      it 'sets trace information' do
-        expect(carrier['uber-trace-id']).to eq(
-          [
-            span_context.trace_id.to_s(16),
-            span_context.span_id.to_s(16),
-            span_context.parent_id.to_s(16),
-            span_context.flags.to_s(16)
-          ].join(':')
-        )
+      it 'calls #inject on codec' do
+        expect(codec).to have_received(:inject)
       end
     end
   end
@@ -199,115 +193,21 @@ describe Jaeger::Client::Tracer do
 
     context 'when FORMAT_TEXT_MAP' do
       let(:carrier) { { 'uber-trace-id' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
-      let(:span_context) { tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
-      it 'has flags' do
-        expect(span_context.flags).to eq(flags.to_i(16))
-      end
+      before { tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
-      context 'when trace-id is a max uint64' do
-        let(:trace_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when parent-id is a max uint64' do
-        let(:parent_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when span-id is a max uint64' do
-        let(:span_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when parent-id is 0' do
-        let(:parent_id) { '0' }
-
-        it 'sets parent_id to 0' do
-          expect(span_context.parent_id).to eq(0)
-        end
-      end
-
-      context 'when trace-id missing' do
-        let(:trace_id) { nil }
-
-        it 'returns nil' do
-          expect(span_context).to eq(nil)
-        end
-      end
-
-      context 'when span-id missing' do
-        let(:span_id) { nil }
-
-        it 'returns nil' do
-          expect(span_context).to eq(nil)
-        end
+      it 'calls #extract_text_map on codec' do
+        expect(codec).to have_received(:extract_text_map)
       end
     end
 
     context 'when FORMAT_RACK' do
       let(:carrier) { { 'HTTP_UBER_TRACE_ID' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
-      let(:span_context) { tracer.extract(OpenTracing::FORMAT_RACK, carrier) }
 
-      it 'has flags' do
-        expect(span_context.flags).to eq(flags.to_i(16))
-      end
+      before { tracer.extract(OpenTracing::FORMAT_RACK, carrier) }
 
-      context 'when trace-id is a max uint64' do
-        let(:trace_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when parent-id is a max uint64' do
-        let(:parent_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when span-id is a max uint64' do
-        let(:span_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when parent-id is 0' do
-        let(:parent_id) { '0' }
-
-        it 'sets parent_id to 0' do
-          expect(span_context.parent_id).to eq(0)
-        end
-      end
-
-      context 'when trace-id is missing' do
-        let(:trace_id) { nil }
-
-        it 'returns nil' do
-          expect(span_context).to eq(nil)
-        end
-      end
-
-      context 'when span-id is missing' do
-        let(:span_id) { nil }
-
-        it 'returns nil' do
-          expect(span_context).to eq(nil)
-        end
+      it 'calls #extract_rack on codec' do
+        expect(codec).to have_received(:extract_rack)
       end
     end
   end

@@ -3,9 +3,10 @@
 module Jaeger
   module Client
     class Tracer
-      def initialize(reporter, sampler)
+      def initialize(reporter, sampler, propagation_codec)
         @reporter = reporter
         @sampler = sampler
+        @propagation_codec = propagation_codec
         @scope_manager = ScopeManager.new
       end
 
@@ -129,12 +130,7 @@ module Jaeger
       def inject(span_context, format, carrier)
         case format
         when OpenTracing::FORMAT_TEXT_MAP, OpenTracing::FORMAT_RACK
-          carrier['uber-trace-id'] = [
-            span_context.trace_id.to_s(16),
-            span_context.span_id.to_s(16),
-            span_context.parent_id.to_s(16),
-            span_context.flags.to_s(16)
-          ].join(':')
+          @propagation_codec.inject(span_context, carrier)
         else
           warn "Jaeger::Client with format #{format} is not supported yet"
         end
@@ -148,9 +144,9 @@ module Jaeger
       def extract(format, carrier)
         case format
         when OpenTracing::FORMAT_TEXT_MAP
-          parse_context(carrier['uber-trace-id'])
+          @propagation_codec.extract_text_map(carrier)
         when OpenTracing::FORMAT_RACK
-          parse_context(carrier['HTTP_UBER_TRACE_ID'])
+          @propagation_codec.extract_rack(carrier)
         else
           warn "Jaeger::Client with format #{format} is not supported yet"
           nil
@@ -158,23 +154,6 @@ module Jaeger
       end
 
       private
-
-      def parse_context(trace)
-        return nil if !trace || trace == ''
-
-        trace_arguments = trace.split(':').map(&TraceId.method(:base16_hex_id_to_uint64))
-        return nil if trace_arguments.size != 4
-
-        trace_id, span_id, parent_id, flags = trace_arguments
-        return nil if trace_id.zero? || span_id.zero?
-
-        SpanContext.new(
-          trace_id: trace_id,
-          parent_id: parent_id,
-          span_id: span_id,
-          flags: flags
-        )
-      end
 
       def prepare_span_context(child_of:, references:, ignore_active_scope:)
         context =
