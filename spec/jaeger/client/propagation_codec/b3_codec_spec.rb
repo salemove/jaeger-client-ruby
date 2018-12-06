@@ -4,7 +4,7 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
   let(:tracer) { Jaeger::Client::Tracer.new(reporter, sampler, codec) }
   let(:reporter) { instance_spy(Jaeger::Client::AsyncReporter) }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
-  let (:codec) { described_class.new }
+  let(:codec) { described_class.new }
 
   describe '#inject' do
     let(:operation_name) { 'operator-name' }
@@ -56,11 +56,10 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
         expect(carrier['x-b3-spanid'].length).to eq 32
         expect(carrier['x-b3-parentspanid'].length).to eq 32
       end
-
     end
   end
 
-  context 'when extracting' do
+  describe '#extract_text_map' do
     let(:hexa_max_uint64) { 'ff' * 8 }
     let(:max_uint64) { 2**64 - 1 }
 
@@ -70,163 +69,170 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
     let(:span_id) { 'aba8be8d019abed2' }
     let(:flags) { '1' }
 
-    describe '#extract_text_map' do
-      context 'when header x-b3-sampled is present' do
-        let(:carrier) { Net::HTTPResponse.new({}, 200, "") }
+    context 'when header x-b3-sampled is present' do
+      let(:carrier) { Net::HTTPResponse.new({}, 200, '') }
+      let(:span_context) { codec.extract_text_map(carrier) }
 
-        before do
-          carrier['x-b3-traceid'] = trace_id
-          carrier['x-b3-spanid'] = span_id
-          carrier['x-b3-parentspanid'] = parent_id
-          carrier['x-b3-sampled'] = flags
-        end
+      before do
+        carrier['x-b3-traceid'] = trace_id
+        carrier['x-b3-spanid'] = span_id
+        carrier['x-b3-parentspanid'] = parent_id
+        carrier['x-b3-sampled'] = flags
+      end
 
-        let(:span_context) { codec.extract_text_map(carrier) }
+      it 'has flags' do
+        expect(span_context.flags).to eq(flags.to_i(16))
+      end
 
-        it 'has flags' do
-          expect(span_context.flags).to eq(flags.to_i(16))
-        end
+      context 'when trace-id is a max uint64' do
+        let(:trace_id) { hexa_max_uint64 }
 
-        context 'when trace-id is a max uint64' do
-          let(:trace_id) { hexa_max_uint64 }
-
-          it 'interprets it correctly' do
-            expect(span_context.trace_id).to eq(max_uint64)
-          end
-        end
-
-        context 'when parent-id is a max uint64' do
-          let(:parent_id) { hexa_max_uint64 }
-
-          it 'interprets it correctly' do
-            expect(span_context.parent_id).to eq(max_uint64)
-          end
-        end
-
-        context 'when span-id is a max uint64' do
-          let(:span_id) { hexa_max_uint64 }
-
-          it 'interprets it correctly' do
-            expect(span_context.span_id).to eq(max_uint64)
-          end
-        end
-
-        context 'when parent-id is 0' do
-          let(:parent_id) { '0' }
-
-          it 'sets parent_id to 0' do
-            expect(span_context.parent_id).to eq(0)
-          end
-        end
-
-        context 'when trace-id missing' do
-          let(:trace_id) { nil }
-
-          it 'returns nil' do
-            expect(span_context).to eq(nil)
-          end
-        end
-
-        context 'when span-id missing' do
-          let(:span_id) { nil }
-
-          it 'returns nil' do
-            expect(span_context).to eq(nil)
-          end
+        it 'interprets it correctly' do
+          expect(span_context.trace_id).to eq(max_uint64)
         end
       end
 
-      context 'when header x-b3-flags is present' do
-        let(:carrier) { Net::HTTPResponse.new({}, 200, "") }
+      context 'when parent-id is a max uint64' do
+        let(:parent_id) { hexa_max_uint64 }
 
-        before do
-          carrier['x-b3-traceid'] = trace_id
-          carrier['x-b3-spanid'] = span_id
-          carrier['x-b3-parentspanid'] = parent_id
-          carrier['x-b3-flags'] = '1'
+        it 'interprets it correctly' do
+          expect(span_context.parent_id).to eq(max_uint64)
         end
+      end
 
-        let(:span_context) { codec.extract_text_map(carrier) }
+      context 'when span-id is a max uint64' do
+        let(:span_id) { hexa_max_uint64 }
 
-        it 'sets the DEBUG flag' do
-          expect(span_context.flags).to eq(0x02)
+        it 'interprets it correctly' do
+          expect(span_context.span_id).to eq(max_uint64)
+        end
+      end
+
+      context 'when parent-id is 0' do
+        let(:parent_id) { '0' }
+
+        it 'sets parent_id to 0' do
+          expect(span_context.parent_id).to eq(0)
+        end
+      end
+
+      context 'when trace-id missing' do
+        let(:trace_id) { nil }
+
+        it 'returns nil' do
+          expect(span_context).to eq(nil)
+        end
+      end
+
+      context 'when span-id missing' do
+        let(:span_id) { nil }
+
+        it 'returns nil' do
+          expect(span_context).to eq(nil)
         end
       end
     end
 
-    describe '#extract_rack' do
-      context 'when header HTTP_X_B3_SAMPLED is present' do
-        let(:carrier) { { 'HTTP_X_B3_TRACEID' => trace_id,
-                          'HTTP_X_B3_SPANID' => span_id,
-                          'HTTP_X_B3_PARENTSPANID' => parent_id,
-                          'HTTP_X_B3_SAMPLED' => flags } }
+    context 'when header x-b3-flags is present' do
+      let(:carrier) { Net::HTTPResponse.new({}, 200, '') }
+      let(:span_context) { codec.extract_text_map(carrier) }
 
-        let(:span_context) { codec.extract_rack(carrier) }
+      before do
+        carrier['x-b3-traceid'] = trace_id
+        carrier['x-b3-spanid'] = span_id
+        carrier['x-b3-parentspanid'] = parent_id
+        carrier['x-b3-flags'] = '1'
+      end
 
-        it 'has flags' do
-          expect(span_context.flags).to eq(flags.to_i(16))
-        end
+      it 'sets the DEBUG flag' do
+        expect(span_context.flags).to eq(0x02)
+      end
+    end
+  end
 
-        context 'when trace-id is a max uint64' do
-          let(:trace_id) { hexa_max_uint64 }
+  describe '#extract_rack' do
+    let(:hexa_max_uint64) { 'ff' * 8 }
+    let(:max_uint64) { 2**64 - 1 }
 
-          it 'interprets it correctly' do
-            expect(span_context.trace_id).to eq(max_uint64)
-          end
-        end
+    let(:operation_name) { 'operator-name' }
+    let(:trace_id) { '58a515c97fd61fd7' }
+    let(:parent_id) { '8e5a8c5509c8dcc1' }
+    let(:span_id) { 'aba8be8d019abed2' }
+    let(:flags) { '1' }
 
-        context 'when parent-id is a max uint64' do
-          let(:parent_id) { hexa_max_uint64 }
+    context 'when header HTTP_X_B3_SAMPLED is present' do
+      let(:carrier) do
+        { 'HTTP_X_B3_TRACEID'      => trace_id,
+          'HTTP_X_B3_SPANID'       => span_id,
+          'HTTP_X_B3_PARENTSPANID' => parent_id,
+          'HTTP_X_B3_SAMPLED'      => flags }
+      end
+      let(:span_context) { codec.extract_rack(carrier) }
 
-          it 'interprets it correctly' do
-            expect(span_context.parent_id).to eq(max_uint64)
-          end
-        end
+      it 'has flags' do
+        expect(span_context.flags).to eq(flags.to_i(16))
+      end
 
-        context 'when span-id is a max uint64' do
-          let(:span_id) { hexa_max_uint64 }
+      context 'when trace-id is a max uint64' do
+        let(:trace_id) { hexa_max_uint64 }
 
-          it 'interprets it correctly' do
-            expect(span_context.span_id).to eq(max_uint64)
-          end
-        end
-
-        context 'when parent-id is 0' do
-          let(:parent_id) { '0' }
-
-          it 'sets parent_id to 0' do
-            expect(span_context.parent_id).to eq(0)
-          end
-        end
-
-        context 'when trace-id is missing' do
-          let(:trace_id) { nil }
-
-          it 'returns nil' do
-            expect(span_context).to eq(nil)
-          end
-        end
-
-        context 'when span-id is missing' do
-          let(:span_id) { nil }
-
-          it 'returns nil' do
-            expect(span_context).to eq(nil)
-          end
+        it 'interprets it correctly' do
+          expect(span_context.trace_id).to eq(max_uint64)
         end
       end
 
-      context 'when header HTTP_X_B3_FLAGS is present' do
-        let(:carrier) { { 'HTTP_X_B3_TRACEID' => trace_id,
-                          'HTTP_X_B3_SPANID' => span_id,
-                          'HTTP_X_B3_PARENTSPANID' => parent_id,
-                          'HTTP_X_B3_FLAGS' => '1' } }
+      context 'when parent-id is a max uint64' do
+        let(:parent_id) { hexa_max_uint64 }
 
-        let(:span_context) { codec.extract_rack(carrier) }
-
-        it 'sets the DEBUG flag' do
-          expect(span_context.flags).to eq(0x02)
+        it 'interprets it correctly' do
+          expect(span_context.parent_id).to eq(max_uint64)
         end
+      end
+
+      context 'when span-id is a max uint64' do
+        let(:span_id) { hexa_max_uint64 }
+
+        it 'interprets it correctly' do
+          expect(span_context.span_id).to eq(max_uint64)
+        end
+      end
+
+      context 'when parent-id is 0' do
+        let(:parent_id) { '0' }
+
+        it 'sets parent_id to 0' do
+          expect(span_context.parent_id).to eq(0)
+        end
+      end
+
+      context 'when trace-id is missing' do
+        let(:trace_id) { nil }
+
+        it 'returns nil' do
+          expect(span_context).to eq(nil)
+        end
+      end
+
+      context 'when span-id is missing' do
+        let(:span_id) { nil }
+
+        it 'returns nil' do
+          expect(span_context).to eq(nil)
+        end
+      end
+    end
+
+    context 'when header HTTP_X_B3_FLAGS is present' do
+      let(:carrier) do
+        { 'HTTP_X_B3_TRACEID'      => trace_id,
+          'HTTP_X_B3_SPANID'       => span_id,
+          'HTTP_X_B3_PARENTSPANID' => parent_id,
+          'HTTP_X_B3_FLAGS'        => '1' }
+      end
+      let(:span_context) { codec.extract_rack(carrier) }
+
+      it 'sets the DEBUG flag' do
+        expect(span_context.flags).to eq(0x02)
       end
     end
   end

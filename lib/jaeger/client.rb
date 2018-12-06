@@ -41,11 +41,11 @@ module Jaeger
 
       reporter = AsyncReporter.create(sender: sender, flush_interval: flush_interval)
 
-      if propagate_b3
-        codec = PropagationCodec::B3Codec.new
-      else
-        codec = PropagationCodec::JaegerCodec.new
-      end
+      codec = if propagate_b3
+                PropagationCodec::B3Codec.new
+              else
+                PropagationCodec::JaegerCodec.new
+              end
 
       Tracer.new(reporter, sampler, codec)
     end

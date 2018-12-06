@@ -4,7 +4,6 @@ module Jaeger
   module Client
     module PropagationCodec
       class B3Codec
-
         # Inject a SpanContext into the given carrier
         #
         # @param span_context [SpanContext]
@@ -16,7 +15,7 @@ module Jaeger
 
           # flags (for debug) and sampled headers are mutually exclusive
           if span_context.flags == Jaeger::Client::SpanContext::Flags::DEBUG
-            carrier['x-b3-flags'] = "1"
+            carrier['x-b3-flags'] = '1'
           else
             carrier['x-b3-sampled'] = span_context.flags.to_s(16)
           end

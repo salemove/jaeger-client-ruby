@@ -4,7 +4,7 @@ describe Jaeger::Client::PropagationCodec::JaegerCodec do
   let(:tracer) { Jaeger::Client::Tracer.new(reporter, sampler, codec) }
   let(:reporter) { instance_spy(Jaeger::Client::AsyncReporter) }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
-  let (:codec) { described_class.new }
+  let(:codec) { described_class.new }
 
   describe '#inject' do
     let(:operation_name) { 'operator-name' }

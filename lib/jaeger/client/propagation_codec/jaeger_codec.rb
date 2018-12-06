@@ -4,7 +4,6 @@ module Jaeger
   module Client
     module PropagationCodec
       class JaegerCodec
-
         # Inject a SpanContext into the given carrier
         #
         # @param span_context [SpanContext]
