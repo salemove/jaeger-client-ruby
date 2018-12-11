@@ -3,21 +3,43 @@
 module Jaeger
   module Client
     module PropagationCodec
-      class B3Codec
+      module B3Codec
         # Inject a SpanContext into the given carrier
         #
         # @param span_context [SpanContext]
         # @param carrier [carrier] A carrier object of type TEXT_MAP or RACK
-        def inject(span_context, carrier)
-          carrier['x-b3-traceid'] = to_hex(span_context.trace_id)
-          carrier['x-b3-spanid'] = to_hex(span_context.span_id)
-          carrier['x-b3-parentspanid'] = to_hex(span_context.parent_id)
+        def self.inject(span_context, format, carrier)
+          case format
+          when OpenTracing::FORMAT_TEXT_MAP, OpenTracing::FORMAT_RACK
+            carrier['x-b3-traceid'] = TraceId.to_hex(span_context.trace_id)
+            carrier['x-b3-spanid'] = TraceId.to_hex(span_context.span_id)
+            carrier['x-b3-parentspanid'] = TraceId.to_hex(span_context.parent_id)
 
-          # flags (for debug) and sampled headers are mutually exclusive
-          if span_context.flags == Jaeger::Client::SpanContext::Flags::DEBUG
-            carrier['x-b3-flags'] = '1'
+            # flags (for debug) and sampled headers are mutually exclusive
+            if span_context.flags == Jaeger::Client::SpanContext::Flags::DEBUG
+              carrier['x-b3-flags'] = '1'
+            else
+              carrier['x-b3-sampled'] = span_context.flags.to_s(16)
+            end
           else
-            carrier['x-b3-sampled'] = span_context.flags.to_s(16)
+            warn "Jaeger::Client with format #{format} is not supported yet"
+          end
+        end
+
+        # Extract a SpanContext in the given format from the given carrier.
+        #
+        # @param format [OpenTracing::FORMAT_TEXT_MAP, OpenTracing::FORMAT_BINARY, OpenTracing::FORMAT_RACK]
+        # @param carrier [Carrier] A carrier object of the type dictated by the specified `format`
+        # @return [SpanContext] the extracted SpanContext or nil if none could be found
+        def self.extract(format, carrier)
+          case format
+          when OpenTracing::FORMAT_TEXT_MAP
+            extract_text_map(carrier)
+          when OpenTracing::FORMAT_RACK
+            extract_rack(carrier)
+          else
+            warn "Jaeger::Client with format #{format} is not supported yet"
+            nil
           end
         end
 
@@ -25,7 +47,7 @@ module Jaeger
         #
         # @param carrier [Carrier] A carrier of type Text Map
         # @return [SpanContext] the extracted SpanContext or nil if none was extracted
-        def extract_text_map(carrier)
+        def self.extract_text_map(carrier)
           trace_id = TraceId.base16_hex_id_to_uint64(carrier['x-b3-traceid'])
           span_id = TraceId.base16_hex_id_to_uint64(carrier['x-b3-spanid'])
           parent_id = TraceId.base16_hex_id_to_uint64(carrier['x-b3-parentspanid'])
@@ -46,7 +68,7 @@ module Jaeger
         #
         # @param carrier [Carrier] A carrier of type Rack
         # @return [SpanContext] the extracted SpanContext or nil if none was extracted
-        def extract_rack(carrier)
+        def self.extract_rack(carrier)
           trace_id = TraceId.base16_hex_id_to_uint64(carrier['HTTP_X_B3_TRACEID'])
           span_id = TraceId.base16_hex_id_to_uint64(carrier['HTTP_X_B3_SPANID'])
           parent_id = TraceId.base16_hex_id_to_uint64(carrier['HTTP_X_B3_PARENTSPANID'])
@@ -63,24 +85,8 @@ module Jaeger
           )
         end
 
-        private
-
-        # Convert an integer id into a 0 padded hex string.
-        # If the string is shorter than 16 characters, it will be padded to 16.
-        # If it is longer than 16 characters, it is padded to 32.
-        def to_hex(id)
-          hex_str = id.to_s(16)
-
-          # pad the string with '0's to 16 or 32 characters
-          if hex_str.length > 16
-            hex_str.rjust(32, '0')
-          else
-            hex_str.rjust(16, '0')
-          end
-        end
-
         # if the flags header is '1' then the sampled header should not be present
-        def parse_flags(flags_header, sampled_header)
+        def self.parse_flags(flags_header, sampled_header)
           if flags_header == '1'
             Jaeger::Client::SpanContext::Flags::DEBUG
           else

@@ -128,12 +128,7 @@ module Jaeger
       # @param format [OpenTracing::FORMAT_TEXT_MAP, OpenTracing::FORMAT_BINARY, OpenTracing::FORMAT_RACK]
       # @param carrier [Carrier] A carrier object of the type dictated by the specified `format`
       def inject(span_context, format, carrier)
-        case format
-        when OpenTracing::FORMAT_TEXT_MAP, OpenTracing::FORMAT_RACK
-          @propagation_codec.inject(span_context, carrier)
-        else
-          warn "Jaeger::Client with format #{format} is not supported yet"
-        end
+        @propagation_codec.inject(span_context, format, carrier)
       end
 
       # Extract a SpanContext in the given format from the given carrier.
@@ -142,15 +137,7 @@ module Jaeger
       # @param carrier [Carrier] A carrier object of the type dictated by the specified `format`
       # @return [SpanContext] the extracted SpanContext or nil if none could be found
       def extract(format, carrier)
-        case format
-        when OpenTracing::FORMAT_TEXT_MAP
-          @propagation_codec.extract_text_map(carrier)
-        when OpenTracing::FORMAT_RACK
-          @propagation_codec.extract_rack(carrier)
-        else
-          warn "Jaeger::Client with format #{format} is not supported yet"
-          nil
-        end
+        @propagation_codec.extract(format, carrier)
       end
 
       private

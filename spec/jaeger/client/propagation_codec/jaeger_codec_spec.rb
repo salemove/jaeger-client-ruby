@@ -4,7 +4,7 @@ describe Jaeger::Client::PropagationCodec::JaegerCodec do
   let(:tracer) { Jaeger::Client::Tracer.new(reporter, sampler, codec) }
   let(:reporter) { instance_spy(Jaeger::Client::AsyncReporter) }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
-  let(:codec) { described_class.new }
+  let(:codec) { described_class }
 
   describe '#inject' do
     let(:operation_name) { 'operator-name' }
@@ -13,7 +13,7 @@ describe Jaeger::Client::PropagationCodec::JaegerCodec do
     let(:carrier) { {} }
 
     context 'when FORMAT_TEXT_MAP' do
-      before { codec.inject(span_context, carrier) }
+      before { codec.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
       it 'sets trace information' do
         expect(carrier['uber-trace-id']).to eq(
@@ -40,7 +40,7 @@ describe Jaeger::Client::PropagationCodec::JaegerCodec do
 
     describe '#extract_text_map' do
       let(:carrier) { { 'uber-trace-id' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
-      let(:span_context) { codec.extract_text_map(carrier) }
+      let(:span_context) { codec.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
       it 'has flags' do
         expect(span_context.flags).to eq(flags.to_i(16))
@@ -97,7 +97,7 @@ describe Jaeger::Client::PropagationCodec::JaegerCodec do
 
     describe '#extract_rack' do
       let(:carrier) { { 'HTTP_UBER_TRACE_ID' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
-      let(:span_context) { codec.extract_rack(carrier) }
+      let(:span_context) { codec.extract(OpenTracing::FORMAT_RACK, carrier) }
 
       it 'has flags' do
         expect(span_context.flags).to eq(flags.to_i(16))

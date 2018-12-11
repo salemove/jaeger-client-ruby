@@ -4,7 +4,8 @@ describe Jaeger::Client::Tracer do
   let(:tracer) { described_class.new(reporter, sampler, codec) }
   let(:reporter) { instance_spy(Jaeger::Client::AsyncReporter) }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
-  let(:codec) { instance_spy(Jaeger::Client::PropagationCodec::JaegerCodec) }
+  # let(:codec) { instance_spy(Jaeger::Client::PropagationCodec::JaegerCodec) }
+  let(:codec) { class_spy(Jaeger::Client::PropagationCodec::JaegerCodec) }
 
   describe '#start_span' do
     let(:operation_name) { 'operator-name' }
@@ -196,8 +197,8 @@ describe Jaeger::Client::Tracer do
 
       before { tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
-      it 'calls #extract_text_map on codec' do
-        expect(codec).to have_received(:extract_text_map)
+      it 'calls #extract' do
+        expect(codec).to have_received(:extract)
       end
     end
 
@@ -206,8 +207,8 @@ describe Jaeger::Client::Tracer do
 
       before { tracer.extract(OpenTracing::FORMAT_RACK, carrier) }
 
-      it 'calls #extract_rack on codec' do
-        expect(codec).to have_received(:extract_rack)
+      it 'calls #extract' do
+        expect(codec).to have_received(:extract)
       end
     end
   end

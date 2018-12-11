@@ -32,7 +32,7 @@ module Jaeger
                    sampler: Samplers::Const.new(true),
                    logger: Logger.new(STDOUT),
                    sender: nil,
-                   propagate_b3: false)
+                   propagation_codec: Jaeger::Client::PropagationCodec::JaegerCodec)
       encoder = Encoders::ThriftEncoder.new(service_name: service_name)
 
       if sender.nil?
@@ -41,13 +41,7 @@ module Jaeger
 
       reporter = AsyncReporter.create(sender: sender, flush_interval: flush_interval)
 
-      codec = if propagate_b3
-                PropagationCodec::B3Codec.new
-              else
-                PropagationCodec::JaegerCodec.new
-              end
-
-      Tracer.new(reporter, sampler, codec)
+      Tracer.new(reporter, sampler, propagation_codec)
     end
   end
 end

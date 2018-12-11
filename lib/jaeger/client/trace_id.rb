@@ -22,6 +22,20 @@ module Jaeger
       def self.uint64_id_to_int64(id)
         id > MAX_64BIT_SIGNED_INT ? id - MAX_64BIT_UNSIGNED_INT - 1 : id
       end
+
+      # Convert an integer id into a 0 padded hex string.
+      # If the string is shorter than 16 characters, it will be padded to 16.
+      # If it is longer than 16 characters, it is padded to 32.
+      def self.to_hex(id)
+        hex_str = id.to_s(16)
+
+        # pad the string with '0's to 16 or 32 characters
+        if hex_str.length > 16
+          hex_str.rjust(32, '0')
+        else
+          hex_str.rjust(16, '0')
+        end
+      end
     end
   end
 end

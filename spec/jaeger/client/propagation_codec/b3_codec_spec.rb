@@ -4,7 +4,7 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
   let(:tracer) { Jaeger::Client::Tracer.new(reporter, sampler, codec) }
   let(:reporter) { instance_spy(Jaeger::Client::AsyncReporter) }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
-  let(:codec) { described_class.new }
+  let(:codec) { described_class }
 
   describe '#inject' do
     let(:operation_name) { 'operator-name' }
@@ -13,7 +13,7 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
     let(:carrier) { {} }
 
     context 'when FORMAT_TEXT_MAP' do
-      before { codec.inject(span_context, carrier) }
+      before { codec.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
       it 'sets trace information' do
         expect(carrier['x-b3-traceid']).to eq(span_context.trace_id.to_s(16).rjust(16, '0'))
@@ -28,7 +28,7 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
         # mock flags since the test tracer doesn't have this yet
         allow(span_context).to receive(:flags).and_return(0x02)
 
-        codec.inject(span_context, carrier)
+        codec.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier)
       end
 
       it 'sets the x-b3-flags header' do
@@ -48,7 +48,7 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
         allow(span_context).to receive(:span_id).and_return(0xFFFFFFFFFFFFFFFFF)
         allow(span_context).to receive(:parent_id).and_return(0xFFFFFFFFFFFFFFFFF)
 
-        codec.inject(span_context, carrier)
+        codec.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier)
       end
 
       it 'pads the hex id strings to 32 characters' do
@@ -71,7 +71,7 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
 
     context 'when header x-b3-sampled is present' do
       let(:carrier) { Net::HTTPResponse.new({}, 200, '') }
-      let(:span_context) { codec.extract_text_map(carrier) }
+      let(:span_context) { codec.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
       before do
         carrier['x-b3-traceid'] = trace_id
@@ -135,7 +135,7 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
 
     context 'when header x-b3-flags is present' do
       let(:carrier) { Net::HTTPResponse.new({}, 200, '') }
-      let(:span_context) { codec.extract_text_map(carrier) }
+      let(:span_context) { codec.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
 
       before do
         carrier['x-b3-traceid'] = trace_id
@@ -167,7 +167,7 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
           'HTTP_X_B3_PARENTSPANID' => parent_id,
           'HTTP_X_B3_SAMPLED'      => flags }
       end
-      let(:span_context) { codec.extract_rack(carrier) }
+      let(:span_context) { codec.extract(OpenTracing::FORMAT_RACK, carrier) }
 
       it 'has flags' do
         expect(span_context.flags).to eq(flags.to_i(16))
@@ -229,7 +229,7 @@ describe Jaeger::Client::PropagationCodec::B3Codec do
           'HTTP_X_B3_PARENTSPANID' => parent_id,
           'HTTP_X_B3_FLAGS'        => '1' }
       end
-      let(:span_context) { codec.extract_rack(carrier) }
+      let(:span_context) { codec.extract(OpenTracing::FORMAT_RACK, carrier) }
 
       it 'sets the DEBUG flag' do
         expect(span_context.flags).to eq(0x02)
