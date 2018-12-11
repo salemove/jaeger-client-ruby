@@ -166,149 +166,35 @@ describe Jaeger::Client::Tracer do
   end
 
   describe '#inject' do
-    let(:operation_name) { 'operator-name' }
-    let(:span) { tracer.start_span(operation_name) }
-    let(:span_context) { span.context }
+    let(:span_context) { instance_double(Jaeger::Client::SpanContext) }
+    let(:format) { OpenTracing::FORMAT_TEXT_MAP }
     let(:carrier) { {} }
 
-    context 'when FORMAT_TEXT_MAP' do
-      before { tracer.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier) }
+    before do
+      allow(Jaeger::Client::Injector).to receive(:inject)
+    end
 
-      it 'sets trace information' do
-        expect(carrier['uber-trace-id']).to eq(
-          [
-            span_context.trace_id.to_s(16),
-            span_context.span_id.to_s(16),
-            span_context.parent_id.to_s(16),
-            span_context.flags.to_s(16)
-          ].join(':')
-        )
-      end
+    it 'delegates the call to injector' do
+      tracer.inject(span_context, format, carrier)
+
+      expect(Jaeger::Client::Injector).to have_received(:inject)
+        .with(span_context, format, carrier)
     end
   end
 
   describe '#extract' do
-    let(:hexa_max_uint64) { 'ff' * 8 }
-    let(:max_uint64) { 2**64 - 1 }
+    let(:format) { OpenTracing::FORMAT_TEXT_MAP }
+    let(:carrier) { {} }
 
-    let(:operation_name) { 'operator-name' }
-    let(:trace_id) { '58a515c97fd61fd7' }
-    let(:parent_id) { '8e5a8c5509c8dcc1' }
-    let(:span_id) { 'aba8be8d019abed2' }
-    let(:flags) { '1' }
-
-    context 'when FORMAT_TEXT_MAP' do
-      let(:carrier) { { 'uber-trace-id' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
-      let(:span_context) { tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
-
-      it 'has flags' do
-        expect(span_context.flags).to eq(flags.to_i(16))
-      end
-
-      context 'when trace-id is a max uint64' do
-        let(:trace_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when parent-id is a max uint64' do
-        let(:parent_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when span-id is a max uint64' do
-        let(:span_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when parent-id is 0' do
-        let(:parent_id) { '0' }
-
-        it 'sets parent_id to 0' do
-          expect(span_context.parent_id).to eq(0)
-        end
-      end
-
-      context 'when trace-id missing' do
-        let(:trace_id) { nil }
-
-        it 'returns nil' do
-          expect(span_context).to eq(nil)
-        end
-      end
-
-      context 'when span-id missing' do
-        let(:span_id) { nil }
-
-        it 'returns nil' do
-          expect(span_context).to eq(nil)
-        end
-      end
+    before do
+      allow(Jaeger::Client::Extractor).to receive(:extract)
     end
 
-    context 'when FORMAT_RACK' do
-      let(:carrier) { { 'HTTP_UBER_TRACE_ID' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
-      let(:span_context) { tracer.extract(OpenTracing::FORMAT_RACK, carrier) }
+    it 'delegates the call to extractor' do
+      tracer.extract(format, carrier)
 
-      it 'has flags' do
-        expect(span_context.flags).to eq(flags.to_i(16))
-      end
-
-      context 'when trace-id is a max uint64' do
-        let(:trace_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.trace_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when parent-id is a max uint64' do
-        let(:parent_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.parent_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when span-id is a max uint64' do
-        let(:span_id) { hexa_max_uint64 }
-
-        it 'interprets it correctly' do
-          expect(span_context.span_id).to eq(max_uint64)
-        end
-      end
-
-      context 'when parent-id is 0' do
-        let(:parent_id) { '0' }
-
-        it 'sets parent_id to 0' do
-          expect(span_context.parent_id).to eq(0)
-        end
-      end
-
-      context 'when trace-id is missing' do
-        let(:trace_id) { nil }
-
-        it 'returns nil' do
-          expect(span_context).to eq(nil)
-        end
-      end
-
-      context 'when span-id is missing' do
-        let(:span_id) { nil }
-
-        it 'returns nil' do
-          expect(span_context).to eq(nil)
-        end
-      end
+      expect(Jaeger::Client::Extractor).to have_received(:extract)
+        .with(format, carrier)
     end
   end
 end

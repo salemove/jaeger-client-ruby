@@ -17,6 +17,12 @@ require_relative 'client/udp_sender'
 require_relative 'client/async_reporter'
 require_relative 'client/version'
 require_relative 'client/samplers'
+require_relative 'client/extractor'
+require_relative 'client/extractor/base'
+require_relative 'client/extractor/rack'
+require_relative 'client/extractor/text_map'
+require_relative 'client/injector'
+require_relative 'client/injector/text_map'
 require_relative 'client/encoders/thrift_encoder'
 
 module Jaeger
