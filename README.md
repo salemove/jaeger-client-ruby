@@ -52,6 +52,28 @@ See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more
 
 `Probabilistic` sampler samples traces with probability equal to `rate` (must be between 0.0 and 1.0). This can be enabled by setting `Jaeger::Client::Samplers::Probabilistic.new(rate: 0.1)`
 
+### Zipkin HTTP B3 compatible header propagation
+
+Jaeger Tracer supports Zipkin B3 Propagation HTTP headers, which are used by a lot of Zipkin tracers. This means that you can use Jaeger in conjunction with OpenZipkin tracers.
+
+To set it up you need to change FORMAT_RACK injector and extractor.
+
+```
+OpenTracing.global_tracer = Jaeger::Client.build(
+  service_name: 'service_name',
+  injectors: {
+    OpenTracing::FORMAT_RACK => [Jaeger::Client::Injectors::B3RackCodec]
+  },
+  extractors: {
+    OpenTracing::FORMAT_RACK => [Jaeger::Client::Extractors::B3RackCodec]
+  }
+)
+```
+
+It's also possible to set up multiple injectors and extractors. Each injector will be called in sequence. Note that if multiple injectors are using the same keys then the values will be overwritten.
+
+If multiple extractors is used then the span context from the first match will be returned.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

@@ -1,11 +1,18 @@
 require 'spec_helper'
 
 describe Jaeger::Client::Tracer do
-  let(:tracer) { described_class.new(reporter, sampler, codec) }
+  let(:tracer) do
+    described_class.new(
+      reporter: reporter,
+      sampler: sampler,
+      injectors: Jaeger::Client::Injectors.prepare(injectors),
+      extractors: Jaeger::Client::Extractors.prepare(extractors)
+    )
+  end
   let(:reporter) { instance_spy(Jaeger::Client::AsyncReporter) }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
-  # let(:codec) { instance_spy(Jaeger::Client::PropagationCodec::JaegerCodec) }
-  let(:codec) { class_spy(Jaeger::Client::PropagationCodec::JaegerCodec) }
+  let(:injectors) { {} }
+  let(:extractors) { {} }
 
   describe '#start_span' do
     let(:operation_name) { 'operator-name' }
@@ -173,42 +180,75 @@ describe Jaeger::Client::Tracer do
     let(:span_context) { span.context }
     let(:carrier) { {} }
 
-    context 'when FORMAT_TEXT_MAP' do
-      before { tracer.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier) }
+    context 'when default injectors' do
+      it 'calls inject on JaegerTextMapCodec when FORMAT_TEXT_MAP' do
+        expect(Jaeger::Client::Injectors::JaegerTextMapCodec).to receive(:inject)
+          .with(span_context, carrier)
+        tracer.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier)
+      end
 
-      it 'calls #inject on codec' do
-        expect(codec).to have_received(:inject)
+      it 'calls inject on JaegerTextMapCodec when FORMAT_RACK' do
+        expect(Jaeger::Client::Injectors::JaegerTextMapCodec).to receive(:inject)
+          .with(span_context, carrier)
+        tracer.inject(span_context, OpenTracing::FORMAT_RACK, carrier)
+      end
+    end
+
+    context 'when custom injectors' do
+      let(:injectors) do
+        { OpenTracing::FORMAT_RACK => [custom_injector1, custom_injector2] }
+      end
+      let(:custom_injector1) { class_double(Jaeger::Client::Injectors::JaegerTextMapCodec, inject: nil) }
+      let(:custom_injector2) { class_double(Jaeger::Client::Injectors::JaegerTextMapCodec, inject: nil) }
+
+      it 'calls all custom injectors' do
+        tracer.inject(span_context, OpenTracing::FORMAT_RACK, carrier)
+
+        expect(custom_injector1).to have_received(:inject).with(span_context, carrier)
+        expect(custom_injector2).to have_received(:inject).with(span_context, carrier)
       end
     end
   end
 
   describe '#extract' do
-    let(:hexa_max_uint64) { 'ff' * 8 }
-    let(:max_uint64) { 2**64 - 1 }
+    let(:carrier) { {} }
+    let(:span_context) { instance_double(Jaeger::Client::SpanContext) }
 
-    let(:operation_name) { 'operator-name' }
-    let(:trace_id) { '58a515c97fd61fd7' }
-    let(:parent_id) { '8e5a8c5509c8dcc1' }
-    let(:span_id) { 'aba8be8d019abed2' }
-    let(:flags) { '1' }
+    context 'when default extractors' do
+      it 'calls extract on JaegerTextMapCodec when FORMAT_TEXT_MAP' do
+        allow(Jaeger::Client::Extractors::JaegerTextMapCodec).to receive(:extract)
+          .with(carrier)
+          .and_return(span_context)
+        expect(tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier)).to eq(span_context)
+      end
 
-    context 'when FORMAT_TEXT_MAP' do
-      let(:carrier) { { 'uber-trace-id' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
-
-      before { tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier) }
-
-      it 'calls #extract' do
-        expect(codec).to have_received(:extract)
+      it 'calls extract on JaegerRackCodec when FORMAT_RACK' do
+        allow(Jaeger::Client::Extractors::JaegerRackCodec).to receive(:extract)
+          .with(carrier)
+          .and_return(span_context)
+        expect(tracer.extract(OpenTracing::FORMAT_RACK, carrier)).to eq(span_context)
       end
     end
 
-    context 'when FORMAT_RACK' do
-      let(:carrier) { { 'HTTP_UBER_TRACE_ID' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
+    context 'when custom extractors' do
+      let(:extractors) do
+        { OpenTracing::FORMAT_RACK => [custom_extractor1, custom_extractor2] }
+      end
+      let(:custom_extractor1) { double }
+      let(:custom_extractor2) { double }
 
-      before { tracer.extract(OpenTracing::FORMAT_RACK, carrier) }
+      it 'calls all custom extractors when no results' do
+        allow(custom_extractor1).to receive(:extract).with(carrier).and_return(nil)
+        allow(custom_extractor2).to receive(:extract).with(carrier).and_return(nil)
+        expect(tracer.extract(OpenTracing::FORMAT_RACK, carrier)).to eq(nil)
 
-      it 'calls #extract' do
-        expect(codec).to have_received(:extract)
+        expect(custom_extractor1).to have_received(:extract)
+        expect(custom_extractor2).to have_received(:extract)
+      end
+
+      it 'returns result from the first matching extractor' do
+        allow(custom_extractor1).to receive(:extract).with(carrier) { span_context }
+        expect(tracer.extract(OpenTracing::FORMAT_RACK, carrier)).to eq(span_context)
       end
     end
   end

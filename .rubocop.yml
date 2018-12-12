@@ -19,6 +19,9 @@ RSpec/ExampleLength:
 RSpec/MultipleExpectations:
   Enabled: no
 
+RSpec/MessageSpies:
+  Enabled: no
+
 Metrics/BlockLength:
   Enabled: no
 
