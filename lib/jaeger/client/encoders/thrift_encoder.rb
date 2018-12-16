@@ -63,9 +63,9 @@ module Jaeger
           references.map do |ref|
             Jaeger::Thrift::SpanRef.new(
               'refType' => span_ref_type(ref.type),
-              'traceIdLow' => ref.context.trace_id,
+              'traceIdLow' => TraceId.uint64_id_to_int64(ref.context.trace_id),
               'traceIdHigh' => 0,
-              'spanId' => ref.context.span_id
+              'spanId' => TraceId.uint64_id_to_int64(ref.context.span_id)
             )
           end
         end
