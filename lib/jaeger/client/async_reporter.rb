@@ -8,21 +8,12 @@ module Jaeger
   module Client
     class AsyncReporter
       def self.create(sender:, flush_interval:)
-        reporter = new(sender)
-
-        # start flush thread
-        Thread.new do
-          loop do
-            reporter.flush
-            sleep(flush_interval)
-          end
-        end
-
-        reporter
+        new(sender, flush_interval)
       end
 
-      def initialize(sender)
+      def initialize(sender, flush_interval)
         @sender = sender
+        @flush_interval = flush_interval
         @buffer = Buffer.new
       end
 
@@ -34,7 +25,23 @@ module Jaeger
 
       def report(span)
         return if !span.context.sampled? && !span.context.debug?
+
+        init_reporter_thread
         @buffer << span
+      end
+
+      private
+
+      def init_reporter_thread
+        return if @initializer_pid == Process.pid
+
+        @initializer_pid = Process.pid
+        Thread.new do
+          loop do
+            flush
+            sleep(@flush_interval)
+          end
+        end
       end
     end
   end
