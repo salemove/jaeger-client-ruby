@@ -6,19 +6,37 @@ module Jaeger
       def initialize(service_name:, tags: {})
         @service_name = service_name
         @tags = prepare_tags(tags)
+        @process = Jaeger::Thrift::Process.new('serviceName' => @service_name, 'tags' => @tags)
       end
 
       def encode(spans)
-        Jaeger::Thrift::Batch.new(
-          'process' => Jaeger::Thrift::Process.new(
-            'serviceName' => @service_name,
-            'tags' => @tags
-          ),
-          'spans' => spans.map(&method(:encode_span))
-        )
+        encode_batch(spans.map(&method(:encode_span)))
+      end
+
+      def encode_limited_size(spans, protocol_class, max_message_length)
+        batches = []
+        current_batch = []
+        current_batch_size = 0
+        spans.each do |span|
+          encoded_span = encode_span(span)
+          encoded_span_size = span_byte_length(encoded_span, protocol_class)
+          if encoded_span_size + current_batch_size > max_message_length && !current_batch.empty?
+            batches << encode_batch(current_batch)
+            current_batch = []
+            current_batch_size = 0
+          end
+          current_batch << encoded_span
+          current_batch_size += encoded_span_size
+        end
+        batches << encode_batch(current_batch) unless current_batch.empty?
+        batches
       end
 
       private
+
+      def encode_batch(encoded_spans)
+        Jaeger::Thrift::Batch.new('process' => @process, 'spans' => encoded_spans)
+      end
 
       def encode_span(span)
         context = span.context
@@ -82,6 +100,29 @@ module Jaeger
         with_default_tags.map do |key, value|
           ThriftTagBuilder.build(key, value)
         end
+      end
+
+      class DummyTransport
+        attr_accessor :size
+
+        def initialize
+          @size = 0
+        end
+
+        def write(buf)
+          @size += buf.size
+        end
+
+        def flush; end
+
+        def close; end
+      end
+
+      def span_byte_length(span, protocol_class)
+        transport = DummyTransport.new
+        protocol = protocol_class.new(transport)
+        span.write(protocol)
+        transport.size
       end
     end
   end
