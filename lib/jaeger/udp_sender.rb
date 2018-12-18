@@ -10,13 +10,14 @@ module Jaeger
       @logger = logger
 
       transport = Transport.new(host, port)
-      protocol = ::Thrift::CompactProtocol.new(transport)
-      @client = Jaeger::Thrift::Agent::Client.new(protocol)
+      @protocol_class = ::Thrift::CompactProtocol
+      protocol = @protocol_class.new(transport)
+      @client = Jaeger::Thrift::Agent.new(protocol)
     end
 
     def send_spans(spans)
-      batch = @encoder.encode(spans)
-      @client.emitBatch(batch)
+      batches = @encoder.encode_limited_size(spans, @protocol_class, 8_000)
+      batches.each { |batch| @client.emitBatch(batch) }
     rescue StandardError => error
       @logger.error("Failure while sending a batch of spans: #{error}")
     end
