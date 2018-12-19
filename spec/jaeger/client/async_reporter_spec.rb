@@ -5,6 +5,8 @@ RSpec.describe Jaeger::Client::AsyncReporter do
   let(:sender) { spy }
   let(:operation_name) { 'op-name' }
 
+  before { allow(Thread).to receive(:new) }
+
   describe '#report' do
     let(:context) do
       Jaeger::Client::SpanContext.new(
