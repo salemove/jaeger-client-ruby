@@ -42,6 +42,7 @@ module Jaeger
       # @param key [String] the key of the baggage item
       # @param value [String] the value of the baggage item
       def set_baggage_item(key, value)
+        @context.set_baggage_item(key, value)
         self
       end
 
@@ -51,7 +52,7 @@ module Jaeger
       #
       # @return Value of the baggage item
       def get_baggage_item(key)
-        nil
+        @context.get_baggage_item(key)
       end
 
       # Add a log entry to this span

@@ -24,13 +24,34 @@ module Jaeger
 
       class JaegerTextMapCodec
         def self.extract(carrier)
-          SerializedJaegerTrace.parse(carrier['uber-trace-id'])
+          context = SerializedJaegerTrace.parse(carrier['uber-trace-id'])
+          return nil unless context
+
+          carrier.each do |key, value|
+            baggage_match = key.match(/\Auberctx-([\w-]+)\Z/)
+            if baggage_match
+              context.set_baggage_item(baggage_match[1], value)
+            end
+          end
+
+          context
         end
       end
 
       class JaegerRackCodec
         def self.extract(carrier)
-          SerializedJaegerTrace.parse(carrier['HTTP_UBER_TRACE_ID'])
+          context = SerializedJaegerTrace.parse(carrier['HTTP_UBER_TRACE_ID'])
+          return nil unless context
+
+          carrier.each do |key, value|
+            baggage_match = key.match(/\AHTTP_UBERCTX_(\w+)\Z/)
+            if baggage_match
+              key = baggage_match[1].downcase.tr('_', '-')
+              context.set_baggage_item(key, value)
+            end
+          end
+
+          context
         end
       end
 

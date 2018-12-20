@@ -3,7 +3,12 @@ require 'spec_helper'
 describe Jaeger::Client::Extractors::JaegerRackCodec do
   let(:span_context) { described_class.extract(carrier) }
 
-  let(:carrier) { { 'HTTP_UBER_TRACE_ID' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}" } }
+  let(:carrier) do
+    {
+      'HTTP_UBER_TRACE_ID' => "#{trace_id}:#{span_id}:#{parent_id}:#{flags}",
+      'HTTP_UBERCTX_FOO_BAR' => 'baz'
+    }
+  end
   let(:trace_id) { '58a515c97fd61fd7' }
   let(:parent_id) { '8e5a8c5509c8dcc1' }
   let(:span_id) { 'aba8be8d019abed2' }
@@ -13,6 +18,10 @@ describe Jaeger::Client::Extractors::JaegerRackCodec do
 
   it 'has flags' do
     expect(span_context.flags).to eq(flags.to_i(16))
+  end
+
+  it 'has baggage' do
+    expect(span_context.get_baggage_item('foo-bar')).to eq('baz')
   end
 
   context 'when trace-id is a max uint64' do

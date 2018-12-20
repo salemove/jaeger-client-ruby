@@ -11,6 +11,9 @@ module Jaeger
             span_context.parent_id.to_s(16),
             span_context.flags.to_s(16)
           ].join(':')
+          span_context.baggage.each do |key, value|
+            carrier["uberctx-#{key}"] = value
+          end
         end
       end
 

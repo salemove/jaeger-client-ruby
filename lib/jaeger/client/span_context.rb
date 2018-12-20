@@ -18,11 +18,13 @@ module Jaeger
       end
 
       def self.create_from_parent_context(span_context)
-        trace_id = span_context.trace_id
-        parent_id = span_context.span_id
-        flags = span_context.flags
-        span_id = TraceId.generate
-        new(span_id: span_id, parent_id: parent_id, trace_id: trace_id, flags: flags)
+        new(
+          trace_id: span_context.trace_id,
+          parent_id: span_context.span_id,
+          span_id: TraceId.generate,
+          flags: span_context.flags,
+          baggage: span_context.baggage.dup
+        )
       end
 
       attr_reader :span_id, :parent_id, :trace_id, :baggage, :flags
@@ -49,6 +51,14 @@ module Jaeger
 
       def to_span_id
         @to_span_id ||= @span_id.to_s(16)
+      end
+
+      def set_baggage_item(key, value)
+        @baggage[key.to_s] = value.to_s
+      end
+
+      def get_baggage_item(key)
+        @baggage[key.to_s]
       end
     end
   end

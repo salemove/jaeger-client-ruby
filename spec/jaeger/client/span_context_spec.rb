@@ -33,9 +33,20 @@ RSpec.describe Jaeger::Client::SpanContext do
       context = described_class.create_from_parent_context(parent)
       expect(context.flags).to eq(parent_flags)
     end
+
+    it 'has parent baggage' do
+      parent.set_baggage_item('foo', 'bar')
+
+      context = described_class.create_from_parent_context(parent)
+      expect(context.baggage).to eq('foo' => 'bar')
+
+      # Ensure changing parent baggage doesn't change the child
+      parent.set_baggage_item('foo', 'bar2')
+      expect(context.baggage).to eq('foo' => 'bar')
+    end
   end
 
-  describe '.create_from_parent_context' do
+  describe '.create_parent_context' do
     context 'when sampler returns true' do
       let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
 
@@ -52,6 +63,11 @@ RSpec.describe Jaeger::Client::SpanContext do
         context = described_class.create_parent_context(sampler)
         expect(context).not_to be_sampled
       end
+    end
+
+    it 'has empty baggage' do
+      context = described_class.create_parent_context
+      expect(context.baggage).to eq({})
     end
   end
 

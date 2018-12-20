@@ -34,4 +34,15 @@ RSpec.describe Jaeger::Client::Span do
       expect(thrift_log.fields).to match(expected_thrift_fields)
     end
   end
+
+  it 'stores and retrieves baggage' do
+    span_context = Jaeger::Client::SpanContext.create_parent_context
+    span = described_class.new(span_context, 'operation_name', nil)
+
+    span.set_baggage_item('foo', 'bar')
+    expect(span.get_baggage_item('foo')).to eq('bar')
+
+    span.set_baggage_item('foo', 'baz')
+    expect(span.get_baggage_item('foo')).to eq('baz')
+  end
 end
