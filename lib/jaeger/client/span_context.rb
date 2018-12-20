@@ -47,10 +47,6 @@ module Jaeger
         @to_trace_id ||= @trace_id.to_s(16)
       end
 
-      def to_parent_id
-        @to_parent_id ||= @parent_id.zero? ? nil : @parent_id.to_s(16)
-      end
-
       def to_span_id
         @to_span_id ||= @span_id.to_s(16)
       end
