@@ -54,4 +54,26 @@ RSpec.describe Jaeger::Client::SpanContext do
       end
     end
   end
+
+  describe '#to_trace_id' do
+    it 'returns trace id in hex format' do
+      span_context = build_span_context(trace_id: 67_667_974_448_284_343)
+      expect(span_context.to_trace_id).to eq('f067aa0ba902b7')
+    end
+  end
+
+  describe '#to_span_id' do
+    it 'returns span id in hex format' do
+      span_context = build_span_context(span_id: 67_667_974_448_284_343)
+      expect(span_context.to_span_id).to eq('f067aa0ba902b7')
+    end
+  end
+
+  def build_span_context(opts)
+    described_class.new({
+      trace_id: Jaeger::Client::TraceId.generate,
+      span_id: Jaeger::Client::TraceId.generate,
+      flags: 0
+    }.merge(opts))
+  end
 end
