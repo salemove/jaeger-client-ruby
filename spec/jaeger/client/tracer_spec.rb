@@ -187,8 +187,8 @@ describe Jaeger::Client::Tracer do
         tracer.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier)
       end
 
-      it 'calls inject on JaegerTextMapCodec when FORMAT_RACK' do
-        expect(Jaeger::Client::Injectors::JaegerTextMapCodec).to receive(:inject)
+      it 'calls inject on JaegerRackCodec when FORMAT_RACK' do
+        expect(Jaeger::Client::Injectors::JaegerRackCodec).to receive(:inject)
           .with(span_context, carrier)
         tracer.inject(span_context, OpenTracing::FORMAT_RACK, carrier)
       end

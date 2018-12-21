@@ -3,14 +3,28 @@
 module Jaeger
   module Client
     module Injectors
+      def self.context_as_jaeger_string(span_context)
+        [
+          span_context.trace_id.to_s(16),
+          span_context.span_id.to_s(16),
+          span_context.parent_id.to_s(16),
+          span_context.flags.to_s(16)
+        ].join(':')
+      end
+
       class JaegerTextMapCodec
         def self.inject(span_context, carrier)
-          carrier['uber-trace-id'] = [
-            span_context.trace_id.to_s(16),
-            span_context.span_id.to_s(16),
-            span_context.parent_id.to_s(16),
-            span_context.flags.to_s(16)
-          ].join(':')
+          carrier['uber-trace-id'] = Injectors.context_as_jaeger_string(span_context)
+          span_context.baggage.each do |key, value|
+            carrier["uberctx-#{key}"] = value
+          end
+        end
+      end
+
+      class JaegerRackCodec
+        def self.inject(span_context, carrier)
+          carrier['uber-trace-id'] =
+            CGI.escape(Injectors.context_as_jaeger_string(span_context))
           span_context.baggage.each do |key, value|
             carrier["uberctx-#{key}"] = value
           end
@@ -41,7 +55,7 @@ module Jaeger
       DEFAULT_INJECTORS = {
         OpenTracing::FORMAT_TEXT_MAP => JaegerTextMapCodec,
         OpenTracing::FORMAT_BINARY => JaegerBinaryCodec,
-        OpenTracing::FORMAT_RACK => JaegerTextMapCodec
+        OpenTracing::FORMAT_RACK => JaegerRackCodec
       }.freeze
 
       def self.prepare(extractors)

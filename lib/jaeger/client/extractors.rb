@@ -40,7 +40,9 @@ module Jaeger
 
       class JaegerRackCodec
         def self.extract(carrier)
-          context = SerializedJaegerTrace.parse(carrier['HTTP_UBER_TRACE_ID'])
+          serialized_trace = carrier['HTTP_UBER_TRACE_ID']
+          serialized_trace = CGI.unescape(serialized_trace) if serialized_trace
+          context = SerializedJaegerTrace.parse(serialized_trace)
           return nil unless context
 
           carrier.each do |key, value|
