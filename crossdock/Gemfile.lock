@@ -1,0 +1,35 @@
+PATH
+  remote: ..
+  specs:
+    jaeger-client (0.7.1)
+      opentracing (~> 0.3)
+      thrift
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    mustermann (1.0.3)
+    opentracing (0.4.3)
+    rack (2.0.6)
+    rack-protection (2.0.4)
+      rack
+    sinatra (2.0.4)
+      mustermann (~> 1.0)
+      rack (~> 2.0)
+      rack-protection (= 2.0.4)
+      tilt (~> 2.0)
+    thrift (0.11.0.0)
+    tilt (2.0.9)
+    webrick (1.4.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  jaeger-client!
+  rack
+  sinatra
+  webrick (~> 1.4.2)
+
+BUNDLED WITH
+   1.16.2
