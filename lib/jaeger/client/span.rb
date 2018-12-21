@@ -23,8 +23,10 @@ module Jaeger
         @reporter = reporter
         @start_time = start_time
         @references = references
-        @tags = tags.map { |key, value| ThriftTagBuilder.build(key, value) }
+        @tags = []
         @logs = []
+
+        tags.each { |key, value| set_tag(key, value) }
       end
 
       # Set a tag value on this span
@@ -33,8 +35,21 @@ module Jaeger
       # @param value [String, Numeric, Boolean] the value of the tag. If it's not
       # a String, Numeric, or Boolean it will be encoded with to_s
       def set_tag(key, value)
+        if key == 'sampling.priority'
+          if value.to_i > 0
+            return self if @context.debug?
+
+            @context.flags = @context.flags | SpanContext::Flags::SAMPLED | SpanContext::Flags::DEBUG
+          else
+            @context.flags = @context.flags & ~SpanContext::Flags::SAMPLED
+          end
+          return self
+        end
+
         # Using Thrift::Tag to avoid unnecessary memory allocations
         @tags << ThriftTagBuilder.build(key, value)
+
+        self
       end
 
       # Set a baggage item on the span

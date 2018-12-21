@@ -28,6 +28,7 @@ module Jaeger
       end
 
       attr_reader :span_id, :parent_id, :trace_id, :baggage, :flags
+      attr_writer :flags
 
       def initialize(span_id:, parent_id: 0, trace_id:, flags:, baggage: {})
         @span_id = span_id

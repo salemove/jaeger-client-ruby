@@ -45,4 +45,23 @@ RSpec.describe Jaeger::Client::Span do
     span.set_baggage_item('foo', 'baz')
     expect(span.get_baggage_item('foo')).to eq('baz')
   end
+
+  describe '#set_tag' do
+    let(:span_context) { Jaeger::Client::SpanContext.create_parent_context }
+    let(:span) { described_class.new(span_context, 'operation_name', nil) }
+
+    context 'when sampling.priority' do
+      it 'sets debug flag to true when sampling.priority is greater than 0' do
+        span.set_tag('sampling.priority', 1)
+        expect(span.context.debug?).to eq(true)
+        expect(span.context.sampled?).to eq(true)
+      end
+
+      it 'sets sampled flag to false when sampling.priority is 0' do
+        span.set_tag('sampling.priority', 0)
+        expect(span.context.debug?).to eq(false)
+        expect(span.context.sampled?).to eq(false)
+      end
+    end
+  end
 end
