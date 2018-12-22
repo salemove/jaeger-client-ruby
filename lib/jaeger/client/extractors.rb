@@ -49,7 +49,7 @@ module Jaeger
             baggage_match = key.match(/\AHTTP_UBERCTX_(\w+)\Z/)
             if baggage_match
               key = baggage_match[1].downcase.tr('_', '-')
-              context.set_baggage_item(key, value)
+              context.set_baggage_item(key, CGI.unescape(value))
             end
           end
 

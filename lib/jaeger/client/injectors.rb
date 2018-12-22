@@ -26,7 +26,7 @@ module Jaeger
           carrier['uber-trace-id'] =
             CGI.escape(Injectors.context_as_jaeger_string(span_context))
           span_context.baggage.each do |key, value|
-            carrier["uberctx-#{key}"] = value
+            carrier["uberctx-#{key}"] = CGI.escape(value)
           end
         end
       end
