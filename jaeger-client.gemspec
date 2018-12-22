@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'OpenTracing Tracer implementation for Jaeger in Ruby'
   spec.description   = ''
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/salemove/jaeger-client-ruby'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
