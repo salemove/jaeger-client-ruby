@@ -73,8 +73,7 @@ RSpec.describe Jaeger::Client::RateLimiter do
   def build_limiter(credits_per_second:, **opts)
     described_class.new({
       credits_per_second: credits_per_second,
-      max_balance: credits_per_second,
-      initial_balance: credits_per_second
+      max_balance: credits_per_second
     }.merge(opts))
   end
 end

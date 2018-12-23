@@ -20,10 +20,10 @@ module Jaeger
     # credits_per_second to desired throughput as bytes/second, and calling
     # check_credit() with the actual message size.
     class RateLimiter
-      def initialize(credits_per_second:, max_balance:, initial_balance: nil)
+      def initialize(credits_per_second:, max_balance:)
         @credits_per_second = credits_per_second
         @max_balance = max_balance
-        @balance = initial_balance || @max_balance * rand
+        @balance = max_balance
         @last_tick = Time.now
       end
 

@@ -64,6 +64,25 @@ Set `sampler` to `Jaeger::Client::Samplers::Ratelimiting.new(max_traces_per_seco
 
 Set `sampler` to `Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic.new(lower_bound: 10, rate: 0.001)`
 
+#### PerOperation sampler
+
+`PerOperation` sampler leverages both Probabilistic sampler and Ratelimiting sampler via the GuaranteedThroughputProbabilistic sampler. This sampler keeps track of all operations and delegates calls the the respective GuaranteedThroughputProbabilistic sampler.
+
+Set `sampler` to
+```
+  Jaeger::Client::Samplers::PerOperation.new(
+    strategies: {
+      per_operation_strategies: [
+        { operation: 'GET /articles', probabilistic_sampling: 0.5 },
+        { operation: 'POST /articles', probabilistic_sampling: 1.0 }
+      ],
+      default_sampling_probability: 0.001,
+      default_lower_bound_traces_per_second: 1.0 / (10.0 * 60.0)
+    },
+    max_operations: 1000
+  )
+```
+
 ### Zipkin HTTP B3 compatible header propagation
 
 Jaeger Tracer supports Zipkin B3 Propagation HTTP headers, which are used by a lot of Zipkin tracers. This means that you can use Jaeger in conjunction with OpenZipkin tracers.
