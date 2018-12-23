@@ -36,7 +36,7 @@ RSpec.describe Jaeger::Client::Span do
   end
 
   it 'stores and retrieves baggage' do
-    span_context = Jaeger::Client::SpanContext.create_parent_context
+    span_context = build_span_context
     span = described_class.new(span_context, 'operation_name', nil)
 
     span.set_baggage_item('foo', 'bar')
@@ -47,7 +47,7 @@ RSpec.describe Jaeger::Client::Span do
   end
 
   describe '#set_tag' do
-    let(:span_context) { Jaeger::Client::SpanContext.create_parent_context }
+    let(:span_context) { build_span_context }
     let(:span) { described_class.new(span_context, 'operation_name', nil) }
 
     context 'when sampling.priority' do

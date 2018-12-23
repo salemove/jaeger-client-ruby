@@ -46,31 +46,6 @@ RSpec.describe Jaeger::Client::SpanContext do
     end
   end
 
-  describe '.create_parent_context' do
-    context 'when sampler returns true' do
-      let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
-
-      it 'marks context as sampled' do
-        context = described_class.create_parent_context(sampler)
-        expect(context).to be_sampled
-      end
-    end
-
-    context 'when sampler returns false' do
-      let(:sampler) { Jaeger::Client::Samplers::Const.new(false) }
-
-      it 'marks context as not sampled' do
-        context = described_class.create_parent_context(sampler)
-        expect(context).not_to be_sampled
-      end
-    end
-
-    it 'has empty baggage' do
-      context = described_class.create_parent_context
-      expect(context.baggage).to eq({})
-    end
-  end
-
   describe '#to_trace_id' do
     it 'returns trace id in hex format' do
       span_context = build_span_context(trace_id: 67_667_974_448_284_343)

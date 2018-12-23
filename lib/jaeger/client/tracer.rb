@@ -50,7 +50,8 @@ module Jaeger
                      tags: {},
                      ignore_active_scope: false,
                      **)
-        context = prepare_span_context(
+        context, sampler_tags = prepare_span_context(
+          operation_name: operation_name,
           child_of: child_of,
           references: references,
           ignore_active_scope: ignore_active_scope
@@ -61,7 +62,7 @@ module Jaeger
           @reporter,
           start_time: start_time,
           references: references,
-          tags: tags.merge(@sampler.tags)
+          tags: tags.merge(sampler_tags)
         )
       end
 
@@ -147,16 +148,26 @@ module Jaeger
 
       private
 
-      def prepare_span_context(child_of:, references:, ignore_active_scope:)
+      def prepare_span_context(operation_name:, child_of:, references:, ignore_active_scope:)
         context =
           context_from_child_of(child_of) ||
           context_from_references(references) ||
           context_from_active_scope(ignore_active_scope)
 
         if context
-          SpanContext.create_from_parent_context(context)
+          [SpanContext.create_from_parent_context(context), {}]
         else
-          SpanContext.create_parent_context(@sampler)
+          trace_id = TraceId.generate
+          is_sampled, tags = @sampler.sample?(
+            trace_id: trace_id,
+            operation_name: operation_name
+          )
+          span_context = SpanContext.new(
+            trace_id: trace_id,
+            span_id: trace_id,
+            flags: is_sampled ? SpanContext::Flags::SAMPLED : SpanContext::Flags::NONE
+          )
+          [span_context, tags]
         end
       end
 

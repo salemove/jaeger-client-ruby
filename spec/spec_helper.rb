@@ -9,4 +9,12 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  def build_span_context(opts = {})
+    Jaeger::Client::SpanContext.new({
+      trace_id: Jaeger::Client::TraceId.generate,
+      span_id: Jaeger::Client::TraceId.generate,
+      flags: Jaeger::Client::SpanContext::Flags::SAMPLED
+    }.merge(opts))
+  end
 end

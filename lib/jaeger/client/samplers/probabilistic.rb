@@ -7,8 +7,6 @@ module Jaeger
       #
       # Sample a portion of traces using trace_id as the random decision
       class Probabilistic
-        attr_reader :tags
-
         def initialize(rate: 0.001)
           if rate < 0.0 || rate > 1.0
             raise "Sampling rate must be between 0.0 and 1.0, got #{rate.inspect}"
@@ -21,8 +19,8 @@ module Jaeger
           }
         end
 
-        def sample?(trace_id)
-          @boundary >= trace_id
+        def sample?(trace_id:, **)
+          [@boundary >= trace_id, @tags]
         end
       end
     end

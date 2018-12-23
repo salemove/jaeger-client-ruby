@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Jaeger::Client::Injectors::B3RackCodec do
   let(:inject) { described_class.inject(span_context, carrier) }
 
-  let(:span_context) { Jaeger::Client::SpanContext.create_parent_context }
+  let(:span_context) { build_span_context }
   let(:carrier) { {} }
 
   it 'sets trace information' do

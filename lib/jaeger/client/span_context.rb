@@ -10,13 +10,6 @@ module Jaeger
         DEBUG = 0x02
       end
 
-      def self.create_parent_context(sampler = Samplers::Const.new(true))
-        trace_id = TraceId.generate
-        span_id = TraceId.generate
-        flags = sampler.sample?(trace_id) ? Flags::SAMPLED : Flags::NONE
-        new(trace_id: trace_id, span_id: span_id, flags: flags)
-      end
-
       def self.create_from_parent_context(span_context)
         new(
           trace_id: span_context.trace_id,

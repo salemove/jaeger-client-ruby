@@ -9,8 +9,6 @@ module Jaeger
       # on the initialization value. Use `Jaeger::Client::Samplers::Const.new(true)`
       # to mark all new traces as sampled.
       class Const
-        attr_reader :tags
-
         def initialize(decision)
           @decision = decision
           @tags = {
@@ -20,7 +18,7 @@ module Jaeger
         end
 
         def sample?(*)
-          @decision
+          [@decision, @tags]
         end
       end
     end

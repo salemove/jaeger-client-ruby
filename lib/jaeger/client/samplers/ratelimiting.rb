@@ -27,7 +27,7 @@ module Jaeger
         end
 
         def sample?(*)
-          @rate_limiter.check_credit(1.0)
+          [@rate_limiter.check_credit(1.0), @tags]
         end
       end
     end
