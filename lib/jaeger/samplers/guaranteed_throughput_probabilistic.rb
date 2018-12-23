@@ -12,15 +12,22 @@ module Jaeger
     # emitted, ie. if is_sampled() for both samplers return true, the tags
     # for Probabilistic sampler will be used.
     class GuaranteedThroughputProbabilistic
-      attr_reader :tags
+      attr_reader :tags, :probabilistic_sampler, :lower_bound_sampler
 
       def initialize(lower_bound:, rate:, lower_bound_sampler: nil)
         @probabilistic_sampler = Probabilistic.new(rate: rate)
         @lower_bound_sampler = lower_bound_sampler || RateLimiting.new(max_traces_per_second: lower_bound)
         @lower_bound_tags = {
           'sampler.type' => 'lowerbound',
-          'sampler.param' => lower_bound
+          'sampler.param' => rate
         }
+      end
+
+      def update(lower_bound:, rate:)
+        is_updated = @probabilistic_sampler.update(rate: rate)
+        is_updated = @lower_bound_sampler.update(max_traces_per_second: lower_bound) || is_updated
+        @lower_bound_tags['sampler.param'] = rate
+        is_updated
       end
 
       def sample?(*args)

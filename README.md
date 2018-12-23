@@ -119,6 +119,20 @@ Set `sampler` to
   )
 ```
 
+#### RemoteControlled sampler
+
+`RemoteControlled` sampler is a sampler that is controller by jaeger agent. It starts out with `Probabilistic` sampler. It polls the jaeger-agent and changes sampling strategy accordingly. Set `sampler` to `Jaeger::Client::Samplers::RemoteControlled.new(service_name: 'service_name')`.
+
+RemoteControlled sampler options:
+| Param             | Required | Description |
+|-------------------|----------|-------------|
+| service_name      | x | name of the current service / application, same as given to Tracer |
+| sampler           |   | initial sampler to use prior to retrieving strategies from Agent |
+| refresh_interval  |   | interval in seconds before sampling strategy refreshes (0 to not refresh, defaults to 60) |
+| host              |   | host for jaeger-agent (defaults to 'localhost') |
+| port              |   | port for jaeger-agent for SamplingManager endpoint (defaults to 5778) |
+| logger            |   | logger for communication between jaeger-agent (default to $stdout logger) |
+
 ### TraceContext compatible header propagation
 
 It is possible to use [W3C Trace Context](https://www.w3.org/TR/trace-context/#overview) headers to propagate the tracing information.

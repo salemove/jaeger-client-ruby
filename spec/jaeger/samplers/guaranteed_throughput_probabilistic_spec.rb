@@ -35,7 +35,7 @@ RSpec.describe Jaeger::Samplers::GuaranteedThroughputProbabilistic do
       it 'returns tags with param 0' do
         expect(tags).to eq(
           'sampler.type' => 'lowerbound',
-          'sampler.param' => lower_bound
+          'sampler.param' => rate
         )
       end
     end
@@ -53,7 +53,7 @@ RSpec.describe Jaeger::Samplers::GuaranteedThroughputProbabilistic do
       it 'returns tags with lower bound param' do
         expect(tags).to eq(
           'sampler.type' => 'lowerbound',
-          'sampler.param' => lower_bound
+          'sampler.param' => rate
         )
       end
     end

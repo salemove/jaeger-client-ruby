@@ -2,12 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Jaeger::Samplers::PerOperation do
   let(:sampler) { described_class.new(strategies: strategies, max_operations: max_operations) }
-  let(:max_operations) { 1000 }
-
-  # let(:sample_args) { { trace_id: trace_id } }
-  # let(:sample_result) { sampler.sample?(sample_args) }
-  # let(:is_sampled) { sample_result[0] }
-  # let(:tags) { sample_result[1] }
+  let(:max_operations) { 100 }
   let(:start_time) { Time.now }
 
   before { Timecop.freeze(start_time) }
@@ -21,7 +16,7 @@ RSpec.describe Jaeger::Samplers::PerOperation do
           default_sampling_probability: 1.0,
           default_lower_bound_traces_per_second: 1,
           per_operation_strategies: [
-            { operation: 'foo', probabilistic_sampling: 0 }
+            { operation: 'foo', probabilistic_sampling: { sampling_rate: 0 } }
           ]
         }
       end
@@ -43,7 +38,7 @@ RSpec.describe Jaeger::Samplers::PerOperation do
         _is_sampled, tags = sampler.sample?(sample_args(operation_name: 'foo'))
         expect(tags).to eq(
           'sampler.type' => 'lowerbound',
-          'sampler.param' => 1
+          'sampler.param' => 0
         )
       end
     end
@@ -54,7 +49,7 @@ RSpec.describe Jaeger::Samplers::PerOperation do
           default_sampling_probability: 0,
           default_lower_bound_traces_per_second: 1,
           per_operation_strategies: [
-            { operation: 'foo', probabilistic_sampling: 1.0 }
+            { operation: 'foo', probabilistic_sampling: { sampling_rate: 1.0 } }
           ]
         }
       end
@@ -111,7 +106,7 @@ RSpec.describe Jaeger::Samplers::PerOperation do
         _is_sampled, tags = sampler.sample?(sample_args(operation_name: 'foo'))
         expect(tags).to eq(
           'sampler.type' => 'lowerbound',
-          'sampler.param' => 1
+          'sampler.param' => 0
         )
       end
     end

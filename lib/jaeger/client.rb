@@ -6,6 +6,9 @@ require 'opentracing'
 require 'jaeger/thrift/agent'
 require 'logger'
 require 'time'
+require 'net/http'
+require 'cgi'
+require 'json'
 
 require_relative 'tracer'
 require_relative 'span'
@@ -23,6 +26,7 @@ require_relative 'injectors'
 require_relative 'extractors'
 require_relative 'rate_limiter'
 require_relative 'thrift_tag_builder'
+require_relative 'recurring_executor'
 
 module Jaeger
   module Client
