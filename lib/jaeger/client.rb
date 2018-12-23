@@ -20,6 +20,7 @@ require_relative 'client/samplers'
 require_relative 'client/encoders/thrift_encoder'
 require_relative 'client/injectors'
 require_relative 'client/extractors'
+require_relative 'client/rate_limiter'
 
 module Jaeger
   module Client

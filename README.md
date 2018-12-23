@@ -52,6 +52,12 @@ See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more
 
 `Probabilistic` sampler samples traces with probability equal to `rate` (must be between 0.0 and 1.0). This can be enabled by setting `Jaeger::Client::Samplers::Probabilistic.new(rate: 0.1)`
 
+#### Ratelimiting sampler
+
+`Ratelimiting` sampler samples at most `max_traces_per_second`. The distribution of sampled traces follows burstiness of the service, i.e. a service with uniformly distributed requests will have those requests sampled uniformly as well, but if requests are bursty, especially sub-second, then a number of sequential requests can be sampled each second.
+
+Set `sampler` to `Jaeger::Client::Samplers::Ratelimiting.new(max_traces_per_second: 100)`
+
 ### Zipkin HTTP B3 compatible header propagation
 
 Jaeger Tracer supports Zipkin B3 Propagation HTTP headers, which are used by a lot of Zipkin tracers. This means that you can use Jaeger in conjunction with OpenZipkin tracers.
