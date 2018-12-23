@@ -61,10 +61,7 @@ module Jaeger
           @reporter,
           start_time: start_time,
           references: references,
-          tags: tags.merge(
-            :'sampler.type' => @sampler.type,
-            :'sampler.param' => @sampler.param
-          )
+          tags: tags.merge(@sampler.tags)
         )
       end
 

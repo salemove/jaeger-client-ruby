@@ -9,6 +9,8 @@ module Jaeger
       # well, but if requests are bursty, especially sub-second, then a number
       # of sequential requests can be sampled each second.
       class Ratelimiting
+        attr_reader :tags
+
         def initialize(max_traces_per_second: 10)
           if max_traces_per_second < 0.0
             raise "max_traces_per_second must not be negative, got #{max_traces_per_second}"
@@ -18,14 +20,14 @@ module Jaeger
             credits_per_second: max_traces_per_second,
             max_balance: [max_traces_per_second, 1.0].max
           )
+          @tags = {
+            'sampler.type' => 'ratelimiting',
+            'sampler.param' => max_traces_per_second
+          }
         end
 
         def sample?(*)
           @rate_limiter.check_credit(1.0)
-        end
-
-        def type
-          'ratelimiting'
         end
       end
     end

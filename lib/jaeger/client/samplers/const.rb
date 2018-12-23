@@ -9,20 +9,19 @@ module Jaeger
       # on the initialization value. Use `Jaeger::Client::Samplers::Const.new(true)`
       # to mark all new traces as sampled.
       class Const
+        attr_reader :tags
+
         def initialize(decision)
           @decision = decision
-          @param = decision ? '1' : '0'
+          @tags = {
+            'sampler.type' => 'const',
+            'sampler.param' => @decision ? 1 : 0
+          }
         end
 
         def sample?(*)
           @decision
         end
-
-        def type
-          'const'
-        end
-
-        attr_reader :param
       end
     end
   end

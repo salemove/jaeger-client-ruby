@@ -34,4 +34,15 @@ RSpec.describe Jaeger::Client::Samplers::Probabilistic do
       expect(sampler.sample?(trace_id)).to eq(true)
     end
   end
+
+  describe '#tags' do
+    let(:rate) { 0.6 }
+
+    it 'returns tags' do
+      expect(sampler.tags).to eq(
+        'sampler.type' => 'probabilistic',
+        'sampler.param' => rate
+      )
+    end
+  end
 end

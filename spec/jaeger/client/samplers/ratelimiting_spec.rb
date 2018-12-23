@@ -20,9 +20,12 @@ RSpec.describe Jaeger::Client::Samplers::Ratelimiting do
     end
   end
 
-  describe '#type' do
-    it 'returns ratelimiting' do
-      expect(sampler.type).to eq('ratelimiting')
+  describe '#tags' do
+    it 'returns tags' do
+      expect(sampler.tags).to eq(
+        'sampler.type' => 'ratelimiting',
+        'sampler.param' => max_traces_per_second
+      )
     end
   end
 end
