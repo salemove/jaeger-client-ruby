@@ -58,6 +58,12 @@ See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more
 
 Set `sampler` to `Jaeger::Client::Samplers::Ratelimiting.new(max_traces_per_second: 100)`
 
+#### GuaranteedThroughputProbabilistic sampler
+
+`GuaranteedThroughputProbabilistic` is a sampler that guarantees a throughput by using a Probabilistic sampler and Ratelimiting sampler The Ratelimiting sampler is used to establish a lower_bound so that every operation is sampled at least once in the time interval defined by the lower_bound.
+
+Set `sampler` to `Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic.new(lower_bound: 10, rate: 0.001)`
+
 ### Zipkin HTTP B3 compatible header propagation
 
 Jaeger Tracer supports Zipkin B3 Propagation HTTP headers, which are used by a lot of Zipkin tracers. This means that you can use Jaeger in conjunction with OpenZipkin tracers.
