@@ -8,7 +8,7 @@ module Jaeger
       # distributed requests will have those requests sampled uniformly as
       # well, but if requests are bursty, especially sub-second, then a number
       # of sequential requests can be sampled each second.
-      class Ratelimiting
+      class RateLimiting
         attr_reader :tags
 
         def initialize(max_traces_per_second: 10)

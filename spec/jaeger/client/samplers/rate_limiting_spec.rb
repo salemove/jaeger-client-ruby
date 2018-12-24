@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Samplers::Ratelimiting do
+RSpec.describe Jaeger::Client::Samplers::RateLimiting do
   let(:sampler) { described_class.new(max_traces_per_second: max_traces_per_second) }
   let(:max_traces_per_second) { 10 }
   let(:sample_args) { { trace_id: Jaeger::Client::TraceId.generate } }

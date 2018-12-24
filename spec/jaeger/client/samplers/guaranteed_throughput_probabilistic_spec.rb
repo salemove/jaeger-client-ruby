@@ -10,7 +10,7 @@ RSpec.describe Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic do
   end
   let(:lower_bound) { 5 }
   let(:rate) { 0.5 }
-  let(:lower_bound_sampler) { instance_double(Jaeger::Client::Samplers::Ratelimiting) }
+  let(:lower_bound_sampler) { instance_double(Jaeger::Client::Samplers::RateLimiting) }
 
   let(:max_traces_per_second) { 10 }
   let(:sample_args) { { trace_id: trace_id } }

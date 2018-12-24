@@ -3,7 +3,7 @@
 module Jaeger
   module Client
     module Samplers
-      # A sampler that leverages both Probabilistic sampler and Ratelimiting
+      # A sampler that leverages both Probabilistic sampler and RateLimiting
       # sampler via the GuaranteedThroughputProbabilistic sampler. This sampler
       # keeps track of all operations and delegates calls the the respective
       # GuaranteedThroughputProbabilistic sampler.

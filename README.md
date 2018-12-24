@@ -52,21 +52,21 @@ See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more
 
 `Probabilistic` sampler samples traces with probability equal to `rate` (must be between 0.0 and 1.0). This can be enabled by setting `Jaeger::Client::Samplers::Probabilistic.new(rate: 0.1)`
 
-#### Ratelimiting sampler
+#### RateLimiting sampler
 
-`Ratelimiting` sampler samples at most `max_traces_per_second`. The distribution of sampled traces follows burstiness of the service, i.e. a service with uniformly distributed requests will have those requests sampled uniformly as well, but if requests are bursty, especially sub-second, then a number of sequential requests can be sampled each second.
+`RateLimiting` sampler samples at most `max_traces_per_second`. The distribution of sampled traces follows burstiness of the service, i.e. a service with uniformly distributed requests will have those requests sampled uniformly as well, but if requests are bursty, especially sub-second, then a number of sequential requests can be sampled each second.
 
-Set `sampler` to `Jaeger::Client::Samplers::Ratelimiting.new(max_traces_per_second: 100)`
+Set `sampler` to `Jaeger::Client::Samplers::RateLimiting.new(max_traces_per_second: 100)`
 
 #### GuaranteedThroughputProbabilistic sampler
 
-`GuaranteedThroughputProbabilistic` is a sampler that guarantees a throughput by using a Probabilistic sampler and Ratelimiting sampler The Ratelimiting sampler is used to establish a lower_bound so that every operation is sampled at least once in the time interval defined by the lower_bound.
+`GuaranteedThroughputProbabilistic` is a sampler that guarantees a throughput by using a Probabilistic sampler and RateLimiting sampler The RateLimiting sampler is used to establish a lower_bound so that every operation is sampled at least once in the time interval defined by the lower_bound.
 
 Set `sampler` to `Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic.new(lower_bound: 10, rate: 0.001)`
 
 #### PerOperation sampler
 
-`PerOperation` sampler leverages both Probabilistic sampler and Ratelimiting sampler via the GuaranteedThroughputProbabilistic sampler. This sampler keeps track of all operations and delegates calls the the respective GuaranteedThroughputProbabilistic sampler.
+`PerOperation` sampler leverages both Probabilistic sampler and RateLimiting sampler via the GuaranteedThroughputProbabilistic sampler. This sampler keeps track of all operations and delegates calls the the respective GuaranteedThroughputProbabilistic sampler.
 
 Set `sampler` to
 ```
