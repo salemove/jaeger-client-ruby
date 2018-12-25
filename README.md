@@ -78,8 +78,6 @@ OpenTracing.global_tracer = Jaeger::Client.build(
 
 LoggingReporter can also use a custom logger. For this provide logger using `logger` keyword argument.
 
-See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more examples.
-
 ### Samplers
 
 #### Const sampler
