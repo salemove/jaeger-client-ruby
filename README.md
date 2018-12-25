@@ -28,6 +28,8 @@ OpenTracing.start_active_span('span name') do
 end
 ```
 
+See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more examples.
+
 ### Reporters
 
 #### RemoteReporter (default)
