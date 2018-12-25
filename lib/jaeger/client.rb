@@ -14,7 +14,7 @@ require_relative 'client/scope_manager'
 require_relative 'client/carrier'
 require_relative 'client/trace_id'
 require_relative 'client/udp_sender'
-require_relative 'client/async_reporter'
+require_relative 'client/reporters'
 require_relative 'client/version'
 require_relative 'client/samplers'
 require_relative 'client/encoders/thrift_encoder'
@@ -41,7 +41,7 @@ module Jaeger
         sender = UdpSender.new(host: host, port: port, encoder: encoder, logger: logger)
       end
 
-      reporter = AsyncReporter.create(sender: sender, flush_interval: flush_interval)
+      reporter = Reporters::AsyncReporter.create(sender: sender, flush_interval: flush_interval)
 
       Tracer.new(
         reporter: reporter,

@@ -9,7 +9,7 @@ describe Jaeger::Client::Tracer do
       extractors: Jaeger::Client::Extractors.prepare(extractors)
     )
   end
-  let(:reporter) { instance_spy(Jaeger::Client::AsyncReporter) }
+  let(:reporter) { instance_spy(Jaeger::Client::Reporters::AsyncReporter) }
   let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
   let(:injectors) { {} }
   let(:extractors) { {} }
