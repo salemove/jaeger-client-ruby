@@ -105,7 +105,7 @@ Set `sampler` to `Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic.ne
 `PerOperation` sampler leverages both Probabilistic sampler and RateLimiting sampler via the GuaranteedThroughputProbabilistic sampler. This sampler keeps track of all operations and delegates calls the the respective GuaranteedThroughputProbabilistic sampler.
 
 Set `sampler` to
-```
+```ruby
   Jaeger::Client::Samplers::PerOperation.new(
     strategies: {
       per_operation_strategies: [
@@ -125,7 +125,7 @@ Jaeger Tracer supports Zipkin B3 Propagation HTTP headers, which are used by a l
 
 To set it up you need to change FORMAT_RACK injector and extractor.
 
-```
+```ruby
 OpenTracing.global_tracer = Jaeger::Client.build(
   service_name: 'service_name',
   injectors: {
