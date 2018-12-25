@@ -17,4 +17,12 @@ RSpec.configure do |config|
       flags: Jaeger::Client::SpanContext::Flags::SAMPLED
     }.merge(opts))
   end
+
+  def build_span(opts = {})
+    span_context = opts.delete(:span_context) || build_span_context
+    operation_name = opts.delete(:operation_name) || 'operation-name'
+    reporter = opts.delete(:reporter) || Jaeger::Client::Reporters::NullReporter.new
+
+    Jaeger::Client::Span.new(span_context, operation_name, reporter, opts)
+  end
 end
