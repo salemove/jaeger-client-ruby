@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Samplers::PerOperation do
+RSpec.describe Jaeger::Samplers::PerOperation do
   let(:sampler) { described_class.new(strategies: strategies, max_operations: max_operations) }
   let(:max_operations) { 1000 }
 
@@ -144,7 +144,7 @@ RSpec.describe Jaeger::Client::Samplers::PerOperation do
 
   def sample_args(opts = {})
     {
-      trace_id: Jaeger::Client::TraceId.generate,
+      trace_id: Jaeger::TraceId.generate,
       operation_name: 'operation-name'
     }.merge(opts)
   end

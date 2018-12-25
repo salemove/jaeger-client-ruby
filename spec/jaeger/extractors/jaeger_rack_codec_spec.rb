@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Jaeger::Client::Extractors::JaegerRackCodec do
+describe Jaeger::Extractors::JaegerRackCodec do
   let(:span_context) { described_class.extract(carrier) }
 
   let(:carrier) do

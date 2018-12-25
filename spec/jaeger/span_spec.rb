@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Span do
+RSpec.describe Jaeger::Span do
   describe '#log_kv' do
     let(:span) { described_class.new(nil, 'operation_name', nil) }
     let(:fields) { { key1: 'value1', key2: 69 } }

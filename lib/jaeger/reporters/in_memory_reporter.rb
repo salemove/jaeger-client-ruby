@@ -1,30 +1,28 @@
 # frozen_string_literal: true
 
 module Jaeger
-  module Client
-    module Reporters
-      class InMemoryReporter
-        def initialize
-          @spans = []
-          @mutex = Mutex.new
-        end
+  module Reporters
+    class InMemoryReporter
+      def initialize
+        @spans = []
+        @mutex = Mutex.new
+      end
 
-        def report(span)
-          @mutex.synchronize do
-            @spans << span
-          end
+      def report(span)
+        @mutex.synchronize do
+          @spans << span
         end
+      end
 
-        def spans
-          @mutex.synchronize do
-            @spans
-          end
+      def spans
+        @mutex.synchronize do
+          @spans
         end
+      end
 
-        def clear
-          @mutex.synchronize do
-            @spans.clear
-          end
+      def clear
+        @mutex.synchronize do
+          @spans.clear
         end
       end
     end

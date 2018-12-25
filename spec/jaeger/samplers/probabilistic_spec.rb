@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Samplers::Probabilistic do
+RSpec.describe Jaeger::Samplers::Probabilistic do
   let(:sampler) { described_class.new(rate: rate) }
   let(:sample_args) { { trace_id: trace_id } }
   let(:sample_result) { sampler.sample?(sample_args) }
@@ -9,7 +9,7 @@ RSpec.describe Jaeger::Client::Samplers::Probabilistic do
 
   context 'when rate is set to 0' do
     let(:rate) { 0 }
-    let(:trace_id) { Jaeger::Client::TraceId.generate }
+    let(:trace_id) { Jaeger::TraceId.generate }
 
     it 'returns false for every trace' do
       expect(is_sampled).to eq(false)
@@ -27,7 +27,7 @@ RSpec.describe Jaeger::Client::Samplers::Probabilistic do
     let(:rate) { 0.5 }
 
     context 'when trace is over the boundary' do
-      let(:trace_id) { Jaeger::Client::TraceId::TRACE_ID_UPPER_BOUND / 2 + 1 }
+      let(:trace_id) { Jaeger::TraceId::TRACE_ID_UPPER_BOUND / 2 + 1 }
 
       it 'returns false' do
         expect(is_sampled).to eq(false)
@@ -42,7 +42,7 @@ RSpec.describe Jaeger::Client::Samplers::Probabilistic do
     end
 
     context 'when trace is under the boundary' do
-      let(:trace_id) { Jaeger::Client::TraceId::TRACE_ID_UPPER_BOUND / 2 - 1 }
+      let(:trace_id) { Jaeger::TraceId::TRACE_ID_UPPER_BOUND / 2 - 1 }
 
       it 'returns true' do
         expect(is_sampled).to eq(true)
@@ -59,7 +59,7 @@ RSpec.describe Jaeger::Client::Samplers::Probabilistic do
 
   context 'when rate is set to 1' do
     let(:rate) { 1 }
-    let(:trace_id) { Jaeger::Client::TraceId.generate }
+    let(:trace_id) { Jaeger::TraceId.generate }
 
     it 'returns true for every trace' do
       expect(is_sampled).to eq(true)

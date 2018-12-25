@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-describe Jaeger::Client::Injectors::JaegerRackCodec do
+describe Jaeger::Injectors::JaegerRackCodec do
   let(:tracer) do
-    Jaeger::Client::Tracer.new(
-      reporter: instance_spy(Jaeger::Client::Reporters::RemoteReporter),
-      sampler: Jaeger::Client::Samplers::Const.new(true),
-      injectors: Jaeger::Client::Injectors.prepare({}),
-      extractors: Jaeger::Client::Extractors.prepare({})
+    Jaeger::Tracer.new(
+      reporter: instance_spy(Jaeger::Reporters::RemoteReporter),
+      sampler: Jaeger::Samplers::Const.new(true),
+      injectors: Jaeger::Injectors.prepare({}),
+      extractors: Jaeger::Extractors.prepare({})
     )
   end
   let(:span) { tracer.start_span('test') }

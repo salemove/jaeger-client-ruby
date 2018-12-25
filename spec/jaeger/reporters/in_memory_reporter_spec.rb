@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Reporters::InMemoryReporter do
+RSpec.describe Jaeger::Reporters::InMemoryReporter do
   let(:reporter) { described_class.new }
 
   describe '#report' do

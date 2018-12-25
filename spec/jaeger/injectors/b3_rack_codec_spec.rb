@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Jaeger::Client::Injectors::B3RackCodec do
+describe Jaeger::Injectors::B3RackCodec do
   let(:inject) { described_class.inject(span_context, carrier) }
 
   let(:span_context) { build_span_context }
@@ -16,9 +16,9 @@ describe Jaeger::Client::Injectors::B3RackCodec do
 
   context 'when sampler flag is DEBUG' do
     let(:span_context) do
-      Jaeger::Client::SpanContext.new(
-        span_id: Jaeger::Client::TraceId.generate,
-        trace_id: Jaeger::Client::TraceId.generate,
+      Jaeger::SpanContext.new(
+        span_id: Jaeger::TraceId.generate,
+        trace_id: Jaeger::TraceId.generate,
         flags: 0x02
       )
     end
@@ -37,7 +37,7 @@ describe Jaeger::Client::Injectors::B3RackCodec do
 
   context 'when span context IDs are longer than 16 characters' do
     let(:span_context) do
-      Jaeger::Client::SpanContext.new(
+      Jaeger::SpanContext.new(
         span_id: 0xFFFFFFFFFFFFFFFFF,
         parent_id: 0xFFFFFFFFFFFFFFFFF,
         trace_id: 0xFFFFFFFFFFFFFFFFF,

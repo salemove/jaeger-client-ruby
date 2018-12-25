@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Samplers::Const do
+RSpec.describe Jaeger::Samplers::Const do
   let(:sampler) { described_class.new(decision) }
-  let(:sample_args) { { trace_id: Jaeger::Client::TraceId.generate } }
+  let(:sample_args) { { trace_id: Jaeger::TraceId.generate } }
   let(:sample_result) { sampler.sample?(sample_args) }
   let(:is_sampled) { sample_result[0] }
   let(:tags) { sample_result[1] }

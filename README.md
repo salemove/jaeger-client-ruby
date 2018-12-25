@@ -43,11 +43,11 @@ To use `HttpSender`:
 ```ruby
 OpenTracing.global_tracer = Jaeger::Client.build(
   service_name: 'service_name',
-  reporter: Jaeger::Client::Reporter::RemoteReporter.new(
-    sender: Jaeger::Client::HttpSender.new(
+  reporter: Jaeger::Reporters::RemoteReporter.new(
+    sender: Jaeger::HttpSender.new(
       url: 'http://localhost:14268/api/traces',
       headers: { 'key' => 'value' }, # headers key is optional
-      encoder: Jaeger::Client::Encoders::ThriftEncoder.new(service_name: 'service_name')
+      encoder: Jaeger::Encoders::ThriftEncoder.new(service_name: 'service_name')
     ),
     flush_interval: 10
   )
@@ -61,7 +61,7 @@ NullReporter ignores all spans.
 ```ruby
 OpenTracing.global_tracer = Jaeger::Client.build(
   service_name: 'service_name',
-  reporter: Jaeger::Client::Reporter::NullReporter.new
+  reporter: Jaeger::Reporters::NullReporter.new
 )
 ```
 
@@ -72,7 +72,7 @@ LoggingReporter prints some details about the span using `logger`. This is meant
 ```ruby
 OpenTracing.global_tracer = Jaeger::Client.build(
   service_name: 'service_name',
-  reporter: Jaeger::Client::Reporter::LoggingReporter.new
+  reporter: Jaeger::Reporters::LoggingReporter.new
 )
 ```
 
@@ -82,23 +82,23 @@ LoggingReporter can also use a custom logger. For this provide logger using `log
 
 #### Const sampler
 
-`Const` sampler always makes the same decision for new traces depending on the initialization value. Set `sampler` to: `Jaeger::Client::Samplers::Const.new(true)` to mark all new traces as sampled.
+`Const` sampler always makes the same decision for new traces depending on the initialization value. Set `sampler` to: `Jaeger::Samplers::Const.new(true)` to mark all new traces as sampled.
 
 #### Probabilistic sampler
 
-`Probabilistic` sampler samples traces with probability equal to `rate` (must be between 0.0 and 1.0). This can be enabled by setting `Jaeger::Client::Samplers::Probabilistic.new(rate: 0.1)`
+`Probabilistic` sampler samples traces with probability equal to `rate` (must be between 0.0 and 1.0). This can be enabled by setting `Jaeger::Samplers::Probabilistic.new(rate: 0.1)`
 
 #### RateLimiting sampler
 
 `RateLimiting` sampler samples at most `max_traces_per_second`. The distribution of sampled traces follows burstiness of the service, i.e. a service with uniformly distributed requests will have those requests sampled uniformly as well, but if requests are bursty, especially sub-second, then a number of sequential requests can be sampled each second.
 
-Set `sampler` to `Jaeger::Client::Samplers::RateLimiting.new(max_traces_per_second: 100)`
+Set `sampler` to `Jaeger::Samplers::RateLimiting.new(max_traces_per_second: 100)`
 
 #### GuaranteedThroughputProbabilistic sampler
 
 `GuaranteedThroughputProbabilistic` is a sampler that guarantees a throughput by using a Probabilistic sampler and RateLimiting sampler The RateLimiting sampler is used to establish a lower_bound so that every operation is sampled at least once in the time interval defined by the lower_bound.
 
-Set `sampler` to `Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic.new(lower_bound: 10, rate: 0.001)`
+Set `sampler` to `Jaeger::Samplers::GuaranteedThroughputProbabilistic.new(lower_bound: 10, rate: 0.001)`
 
 #### PerOperation sampler
 
@@ -106,7 +106,7 @@ Set `sampler` to `Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic.ne
 
 Set `sampler` to
 ```ruby
-  Jaeger::Client::Samplers::PerOperation.new(
+  Jaeger::Samplers::PerOperation.new(
     strategies: {
       per_operation_strategies: [
         { operation: 'GET /articles', probabilistic_sampling: 0.5 },
@@ -129,10 +129,10 @@ To set it up you need to change FORMAT_RACK injector and extractor.
 OpenTracing.global_tracer = Jaeger::Client.build(
   service_name: 'service_name',
   injectors: {
-    OpenTracing::FORMAT_RACK => [Jaeger::Client::Injectors::B3RackCodec]
+    OpenTracing::FORMAT_RACK => [Jaeger::Injectors::B3RackCodec]
   },
   extractors: {
-    OpenTracing::FORMAT_RACK => [Jaeger::Client::Extractors::B3RackCodec]
+    OpenTracing::FORMAT_RACK => [Jaeger::Extractors::B3RackCodec]
   }
 )
 ```

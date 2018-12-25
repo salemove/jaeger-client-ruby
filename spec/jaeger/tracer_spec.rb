@@ -1,16 +1,16 @@
 require 'spec_helper'
 
-describe Jaeger::Client::Tracer do
+describe Jaeger::Tracer do
   let(:tracer) do
     described_class.new(
       reporter: reporter,
       sampler: sampler,
-      injectors: Jaeger::Client::Injectors.prepare(injectors),
-      extractors: Jaeger::Client::Extractors.prepare(extractors)
+      injectors: Jaeger::Injectors.prepare(injectors),
+      extractors: Jaeger::Extractors.prepare(extractors)
     )
   end
-  let(:reporter) { instance_spy(Jaeger::Client::Reporters::RemoteReporter) }
-  let(:sampler) { Jaeger::Client::Samplers::Const.new(true) }
+  let(:reporter) { instance_spy(Jaeger::Reporters::RemoteReporter) }
+  let(:sampler) { Jaeger::Samplers::Const.new(true) }
   let(:injectors) { {} }
   let(:extractors) { {} }
 
@@ -182,13 +182,13 @@ describe Jaeger::Client::Tracer do
 
     context 'when default injectors' do
       it 'calls inject on JaegerTextMapCodec when FORMAT_TEXT_MAP' do
-        expect(Jaeger::Client::Injectors::JaegerTextMapCodec).to receive(:inject)
+        expect(Jaeger::Injectors::JaegerTextMapCodec).to receive(:inject)
           .with(span_context, carrier)
         tracer.inject(span_context, OpenTracing::FORMAT_TEXT_MAP, carrier)
       end
 
       it 'calls inject on JaegerRackCodec when FORMAT_RACK' do
-        expect(Jaeger::Client::Injectors::JaegerRackCodec).to receive(:inject)
+        expect(Jaeger::Injectors::JaegerRackCodec).to receive(:inject)
           .with(span_context, carrier)
         tracer.inject(span_context, OpenTracing::FORMAT_RACK, carrier)
       end
@@ -198,8 +198,8 @@ describe Jaeger::Client::Tracer do
       let(:injectors) do
         { OpenTracing::FORMAT_RACK => [custom_injector1, custom_injector2] }
       end
-      let(:custom_injector1) { class_double(Jaeger::Client::Injectors::JaegerTextMapCodec, inject: nil) }
-      let(:custom_injector2) { class_double(Jaeger::Client::Injectors::JaegerTextMapCodec, inject: nil) }
+      let(:custom_injector1) { class_double(Jaeger::Injectors::JaegerTextMapCodec, inject: nil) }
+      let(:custom_injector2) { class_double(Jaeger::Injectors::JaegerTextMapCodec, inject: nil) }
 
       it 'calls all custom injectors' do
         tracer.inject(span_context, OpenTracing::FORMAT_RACK, carrier)
@@ -212,18 +212,18 @@ describe Jaeger::Client::Tracer do
 
   describe '#extract' do
     let(:carrier) { {} }
-    let(:span_context) { instance_double(Jaeger::Client::SpanContext) }
+    let(:span_context) { instance_double(Jaeger::SpanContext) }
 
     context 'when default extractors' do
       it 'calls extract on JaegerTextMapCodec when FORMAT_TEXT_MAP' do
-        allow(Jaeger::Client::Extractors::JaegerTextMapCodec).to receive(:extract)
+        allow(Jaeger::Extractors::JaegerTextMapCodec).to receive(:extract)
           .with(carrier)
           .and_return(span_context)
         expect(tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier)).to eq(span_context)
       end
 
       it 'calls extract on JaegerRackCodec when FORMAT_RACK' do
-        allow(Jaeger::Client::Extractors::JaegerRackCodec).to receive(:extract)
+        allow(Jaeger::Extractors::JaegerRackCodec).to receive(:extract)
           .with(carrier)
           .and_return(span_context)
         expect(tracer.extract(OpenTracing::FORMAT_RACK, carrier)).to eq(span_context)

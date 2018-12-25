@@ -25,6 +25,17 @@ require_relative 'rate_limiter'
 
 module Jaeger
   module Client
+    # We initially had everything under Jaeger::Client namespace. This however
+    # was not very useful and was removed. These assignments are here for
+    # backwards compatibility. Fine to remove in the next major version.
+    UdpSender = Jaeger::UdpSender
+    HttpSender = Jaeger::HttpSender
+    Encoders = Jaeger::Encoders
+    Samplers = Jaeger::Samplers
+    Reporters = Jaeger::Reporters
+    Injectors = Jaeger::Injectors
+    Extractors = Jaeger::Extractors
+
     DEFAULT_FLUSH_INTERVAL = 10
 
     def self.build(host: '127.0.0.1',

@@ -103,7 +103,7 @@ class HttpServer < Sinatra::Application
       host: 'jaeger-agent',
       port: 6831,
       flush_interval: 1,
-      sampler: Jaeger::Client::Samplers::Const.new(true)
+      sampler: Jaeger::Samplers::Const.new(true)
     )
   end
 

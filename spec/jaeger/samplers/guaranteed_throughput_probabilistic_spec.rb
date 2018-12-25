@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic do
+RSpec.describe Jaeger::Samplers::GuaranteedThroughputProbabilistic do
   let(:sampler) do
     described_class.new(
       lower_bound: lower_bound,
@@ -10,7 +10,7 @@ RSpec.describe Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic do
   end
   let(:lower_bound) { 5 }
   let(:rate) { 0.5 }
-  let(:lower_bound_sampler) { instance_double(Jaeger::Client::Samplers::RateLimiting) }
+  let(:lower_bound_sampler) { instance_double(Jaeger::Samplers::RateLimiting) }
 
   let(:max_traces_per_second) { 10 }
   let(:sample_args) { { trace_id: trace_id } }
@@ -20,7 +20,7 @@ RSpec.describe Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic do
 
   context 'when rate is set to 0' do
     let(:rate) { 0 }
-    let(:trace_id) { Jaeger::Client::TraceId.generate }
+    let(:trace_id) { Jaeger::TraceId.generate }
 
     context 'when lower bound return false' do
       before do
@@ -61,7 +61,7 @@ RSpec.describe Jaeger::Client::Samplers::GuaranteedThroughputProbabilistic do
 
   context 'when rate is set to 1' do
     let(:rate) { 1 }
-    let(:trace_id) { Jaeger::Client::TraceId.generate }
+    let(:trace_id) { Jaeger::TraceId.generate }
 
     before do
       allow(lower_bound_sampler).to receive(:sample?)

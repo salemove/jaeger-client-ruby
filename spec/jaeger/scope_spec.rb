@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Scope do
-  let(:span) { instance_spy(Jaeger::Client::Span) }
-  let(:scope_stack) { Jaeger::Client::ScopeManager::ScopeStack.new }
+RSpec.describe Jaeger::Scope do
+  let(:span) { instance_spy(Jaeger::Span) }
+  let(:scope_stack) { Jaeger::ScopeManager::ScopeStack.new }
   let(:finish_on_close) { true }
   let(:scope) { described_class.new(span, scope_stack, finish_on_close: finish_on_close) }
 

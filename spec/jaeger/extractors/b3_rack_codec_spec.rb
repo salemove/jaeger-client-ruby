@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Jaeger::Client::Extractors::B3RackCodec do
+describe Jaeger::Extractors::B3RackCodec do
   let(:span_context) { described_class.extract(carrier) }
 
   let(:operation_name) { 'operator-name' }

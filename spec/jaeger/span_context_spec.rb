@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::SpanContext do
+RSpec.describe Jaeger::SpanContext do
   describe '.create_from_parent_context' do
     let(:parent) do
       described_class.new(
@@ -62,8 +62,8 @@ RSpec.describe Jaeger::Client::SpanContext do
 
   def build_span_context(opts)
     described_class.new({
-      trace_id: Jaeger::Client::TraceId.generate,
-      span_id: Jaeger::Client::TraceId.generate,
+      trace_id: Jaeger::TraceId.generate,
+      span_id: Jaeger::TraceId.generate,
       flags: 0
     }.merge(opts))
   end

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Jaeger::Client::TraceId do
+describe Jaeger::TraceId do
   describe '.base16_hex_id_to_uint64' do
     it 'returns 0 when negative number' do
       id = described_class.base16_hex_id_to_uint64('-1')

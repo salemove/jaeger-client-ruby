@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::RateLimiter do
+RSpec.describe Jaeger::RateLimiter do
   let(:start_time) { Time.now }
 
   before { Timecop.freeze(start_time) }

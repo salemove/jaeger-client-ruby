@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::ScopeManager do
+RSpec.describe Jaeger::ScopeManager do
   let(:scope_manager) { described_class.new }
-  let(:span) { instance_spy(Jaeger::Client::Span) }
+  let(:span) { instance_spy(Jaeger::Span) }
 
   context 'when activating a span' do
     it 'marks the span active' do
@@ -11,7 +11,7 @@ RSpec.describe Jaeger::Client::ScopeManager do
     end
 
     it 'changes the active span' do
-      span2 = instance_spy(Jaeger::Client::Span)
+      span2 = instance_spy(Jaeger::Span)
 
       scope_manager.activate(span)
       scope_manager.activate(span2)
@@ -21,7 +21,7 @@ RSpec.describe Jaeger::Client::ScopeManager do
 
   context 'when closing an active span' do
     it 'reverts to the previous active span' do
-      span2 = instance_spy(Jaeger::Client::Span)
+      span2 = instance_spy(Jaeger::Span)
 
       scope_manager.activate(span)
 

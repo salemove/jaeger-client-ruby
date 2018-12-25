@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Reporters::LoggingReporter do
+RSpec.describe Jaeger::Reporters::LoggingReporter do
   let(:reporter) { described_class.new(logger: logger) }
   let(:logger) { instance_spy(Logger) }
 
