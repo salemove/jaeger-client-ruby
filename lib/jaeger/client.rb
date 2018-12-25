@@ -34,15 +34,20 @@ module Jaeger
                    sampler: Samplers::Const.new(true),
                    logger: Logger.new(STDOUT),
                    sender: nil,
+                   reporter: nil,
                    injectors: {},
                    extractors: {})
       encoder = Encoders::ThriftEncoder.new(service_name: service_name)
 
-      if sender.nil?
-        sender = UdpSender.new(host: host, port: port, encoder: encoder, logger: logger)
+      if sender
+        warn '[DEPRECATION] Passing `sender` directly to Jaeger::Client.build is deprecated.' \
+          'Please use `reporter` instead.'
       end
 
-      reporter = Reporters::RemoteReporter.new(sender: sender, flush_interval: flush_interval)
+      reporter ||= Reporters::RemoteReporter.new(
+        sender: sender || UdpSender.new(host: host, port: port, encoder: encoder, logger: logger),
+        flush_interval: flush_interval
+      )
 
       Tracer.new(
         reporter: reporter,
