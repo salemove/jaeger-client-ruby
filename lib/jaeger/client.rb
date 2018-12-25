@@ -41,7 +41,7 @@ module Jaeger
         sender = UdpSender.new(host: host, port: port, encoder: encoder, logger: logger)
       end
 
-      reporter = Reporters::AsyncReporter.create(sender: sender, flush_interval: flush_interval)
+      reporter = Reporters::RemoteReporter.new(sender: sender, flush_interval: flush_interval)
 
       Tracer.new(
         reporter: reporter,

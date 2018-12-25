@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-RSpec.describe Jaeger::Client::Reporters::AsyncReporter do
-  let(:reporter) { described_class.new(sender, 1) }
+RSpec.describe Jaeger::Client::Reporters::RemoteReporter do
+  let(:reporter) { described_class.new(sender: sender, flush_interval: 1) }
   let(:sender) { spy }
   let(:operation_name) { 'op-name' }
 

@@ -3,7 +3,7 @@
 module Jaeger
   module Client
     module Reporters
-      class AsyncReporter
+      class RemoteReporter
         class Buffer
           def initialize
             @buffer = []

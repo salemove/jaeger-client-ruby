@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Jaeger::Client::Injectors::JaegerTextMapCodec do
   let(:tracer) do
     Jaeger::Client::Tracer.new(
-      reporter: instance_spy(Jaeger::Client::Reporters::AsyncReporter),
+      reporter: instance_spy(Jaeger::Client::Reporters::RemoteReporter),
       sampler: Jaeger::Client::Samplers::Const.new(true),
       injectors: Jaeger::Client::Injectors.prepare({}),
       extractors: Jaeger::Client::Extractors.prepare({})

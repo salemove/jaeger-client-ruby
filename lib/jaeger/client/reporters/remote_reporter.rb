@@ -1,16 +1,12 @@
 # frozen_string_literal: true
 
-require_relative './async_reporter/buffer'
+require_relative './remote_reporter/buffer'
 
 module Jaeger
   module Client
     module Reporters
-      class AsyncReporter
-        def self.create(sender:, flush_interval:)
-          new(sender, flush_interval)
-        end
-
-        def initialize(sender, flush_interval)
+      class RemoteReporter
+        def initialize(sender:, flush_interval:)
           @sender = sender
           @flush_interval = flush_interval
           @buffer = Buffer.new
