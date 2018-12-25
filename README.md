@@ -28,17 +28,53 @@ OpenTracing.start_active_span('span name') do
 end
 ```
 
-The tracer can also take an externally configured sender. For example, the `HttpSender` can be configured with a different endpoint and headers for authentication.
+### Reporters
+
+#### RemoteReporter (default)
+
+RemoteReporter buffers spans in memory and sends them out of process using Sender.
+
+There are two senders: `UdpSender` (default) and `HttpSender`.
+
+To use `HttpSender`:
+
 ```ruby
-require 'jaeger/client'
-require 'jaeger/client/http_sender'
-
-headers = { "auth_token" => token }
-encoder = Jaeger::Client::Encoders::ThriftEncoder.new(service_name: "service_name")
-sender = Jaeger::Client::HttpSender.new(url: "http://localhost:14268/api/traces", headers: headers, encoder: encoder)
-
-OpenTracing.global_tracer = Jaeger::Client.build(service_name: "service_name", sender: sender)
+OpenTracing.global_tracer = Jaeger::Client.build(
+  service_name: 'service_name',
+  reporter: Jaeger::Client::Reporter::RemoteReporter.new(
+    sender: Jaeger::Client::HttpSender.new(
+      url: 'http://localhost:14268/api/traces',
+      headers: { 'key' => 'value' }, # headers key is optional
+      encoder: Jaeger::Client::Encoders::ThriftEncoder.new(service_name: 'service_name')
+    ),
+    flush_interval: 10
+  )
+)
 ```
+
+#### NullReporter
+
+NullReporter ignores all spans.
+
+```ruby
+OpenTracing.global_tracer = Jaeger::Client.build(
+  service_name: 'service_name',
+  reporter: Jaeger::Client::Reporter::NullReporter.new
+)
+```
+
+#### LoggingReporter
+
+LoggingReporter prints some details about the span using `logger`. This is meant only for debugging. Do not parse and use this information for anything critical. The implemenation can change at any time.
+
+```ruby
+OpenTracing.global_tracer = Jaeger::Client.build(
+  service_name: 'service_name',
+  reporter: Jaeger::Client::Reporter::LoggingReporter.new
+)
+```
+
+LoggingReporter can also use a custom logger. For this provide logger using `logger` keyword argument.
 
 See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more examples.
 
