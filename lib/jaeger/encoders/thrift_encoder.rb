@@ -3,28 +3,9 @@
 module Jaeger
   module Encoders
     class ThriftEncoder
-      def initialize(service_name:)
+      def initialize(service_name:, tags: {})
         @service_name = service_name
-        @tags = [
-          Jaeger::Thrift::Tag.new(
-            'key' => 'jaeger.version',
-            'vType' => Jaeger::Thrift::TagType::STRING,
-            'vStr' => 'Ruby-' + Jaeger::Client::VERSION
-          ),
-          Jaeger::Thrift::Tag.new(
-            'key' => 'hostname',
-            'vType' => Jaeger::Thrift::TagType::STRING,
-            'vStr' => Socket.gethostname
-          )
-        ]
-        ipv4 = Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }
-        unless ipv4.nil? # rubocop:disable Style/GuardClause
-          @tags << Jaeger::Thrift::Tag.new(
-            'key' => 'ip',
-            'vType' => Jaeger::Thrift::TagType::STRING,
-            'vStr' => ipv4.ip_address
-          )
-        end
+        @tags = prepare_tags(tags)
       end
 
       def encode(spans)
@@ -85,6 +66,21 @@ module Jaeger
         else
           warn "Jaeger::Client with format #{type} is not supported yet"
           nil
+        end
+      end
+
+      def prepare_tags(tags)
+        with_default_tags = tags.dup
+        with_default_tags['jaeger.version'] = 'Ruby-' + Jaeger::Client::VERSION
+        with_default_tags['hostname'] ||= Socket.gethostname
+
+        unless with_default_tags['ip']
+          ipv4 = Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }
+          with_default_tags['ip'] = ipv4.ip_address unless ipv4.nil?
+        end
+
+        with_default_tags.map do |key, value|
+          ThriftTagBuilder.build(key, value)
         end
       end
     end

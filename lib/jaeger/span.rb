@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'span/thrift_tag_builder'
 require_relative 'span/thrift_log_builder'
 
 module Jaeger

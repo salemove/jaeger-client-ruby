@@ -21,6 +21,7 @@ require_relative 'encoders/thrift_encoder'
 require_relative 'injectors'
 require_relative 'extractors'
 require_relative 'rate_limiter'
+require_relative 'thrift_tag_builder'
 
 module Jaeger
   module Client
@@ -46,8 +47,9 @@ module Jaeger
                    sender: nil,
                    reporter: nil,
                    injectors: {},
-                   extractors: {})
-      encoder = Encoders::ThriftEncoder.new(service_name: service_name)
+                   extractors: {},
+                   tags: {})
+      encoder = Encoders::ThriftEncoder.new(service_name: service_name, tags: tags)
 
       if sender
         warn '[DEPRECATION] Passing `sender` directly to Jaeger::Client.build is deprecated.' \

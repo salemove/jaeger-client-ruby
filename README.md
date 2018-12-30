@@ -141,6 +141,20 @@ It's also possible to set up multiple injectors and extractors. Each injector wi
 
 If multiple extractors is used then the span context from the first match will be returned.
 
+### Process Tags
+
+Jaeger Tracer allows you to define process level tags. By default the tracer provides `jaeger.version`, `ip` and `hostname`. You may want to overwrite `ip` or `hostname` if the tracer cannot auto-detect them.
+
+```ruby
+OpenTracing.global_tracer = Jaeger::Client.build(
+  service_name: 'service_name',
+  tags: {
+    'hostname' => 'custom-hostname',
+    'custom_tag' => 'custom-tag-value'
+  }
+)
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
