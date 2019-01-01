@@ -57,12 +57,12 @@ module Jaeger
       OpenTracing::FORMAT_RACK => JaegerRackCodec
     }.freeze
 
-    def self.prepare(extractors)
-      DEFAULT_INJECTORS.reduce(extractors) do |acc, (format, default)|
-        provided_extractors = Array(extractors[format])
-        provided_extractors += [default] if provided_extractors.empty?
+    def self.prepare(injectors)
+      DEFAULT_INJECTORS.reduce(injectors) do |acc, (format, default)|
+        provided_injectors = Array(injectors[format])
+        provided_injectors += [default] if provided_injectors.empty?
 
-        acc.merge(format => provided_extractors)
+        acc.merge(format => provided_injectors)
       end
     end
   end
