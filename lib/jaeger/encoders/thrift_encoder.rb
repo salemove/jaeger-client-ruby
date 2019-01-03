@@ -6,6 +6,7 @@ module Jaeger
       def initialize(service_name:, tags: {})
         @service_name = service_name
         @tags = prepare_tags(tags)
+        @process = Jaeger::Thrift::Process.new('serviceName' => @service_name, 'tags' => @tags)
       end
 
       def encode(spans)
@@ -34,7 +35,7 @@ module Jaeger
       private
 
       def encode_batch(encoded_spans)
-        Jaeger::Thrift::Batch.new('process' => Jaeger::Thrift::Process.new('serviceName' => @service_name, 'tags' => @tags), 'spans' => encoded_spans)
+        Jaeger::Thrift::Batch.new('process' => @process, 'spans' => encoded_spans)
       end
 
       def encode_span(span)
