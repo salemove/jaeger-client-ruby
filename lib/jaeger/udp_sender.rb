@@ -12,7 +12,7 @@ module Jaeger
       transport = Transport.new(host, port)
       @protocol_class = ::Thrift::CompactProtocol
       protocol = @protocol_class.new(transport)
-      @client = Jaeger::Thrift::Agent.new(protocol)
+      @client = Jaeger::Thrift::Agent::Client.new(protocol)
       @max_packet_size = max_packet_size
     end
 
