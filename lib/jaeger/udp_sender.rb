@@ -5,7 +5,7 @@ require 'socket'
 
 module Jaeger
   class UdpSender
-    def initialize(host:, port:, encoder:, logger:, max_packet_size: = 65_000)
+    def initialize(host:, port:, encoder:, logger:, max_packet_size: 65_000)
       @encoder = encoder
       @logger = logger
 
