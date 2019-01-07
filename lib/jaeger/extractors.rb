@@ -63,11 +63,39 @@ module Jaeger
     end
 
     class B3RackCodec
+      class Keys
+        TRACE_ID = 'HTTP_X_B3_TRACEID'.freeze
+        SPAN_ID = 'HTTP_X_B3_SPANID'.freeze
+        PARENT_SPAN_ID = 'HTTP_X_B3_PARENTSPANID'.freeze
+        FLAGS = 'HTTP_X_B3_FLAGS'.freeze
+        SAMPLED = 'HTTP_X_B3_SAMPLED'.freeze
+      end.freeze
+
       def self.extract(carrier)
-        trace_id = TraceId.base16_hex_id_to_uint64(carrier['HTTP_X_B3_TRACEID'])
-        span_id = TraceId.base16_hex_id_to_uint64(carrier['HTTP_X_B3_SPANID'])
-        parent_id = TraceId.base16_hex_id_to_uint64(carrier['HTTP_X_B3_PARENTSPANID'])
-        flags = parse_flags(carrier['HTTP_X_B3_FLAGS'], carrier['HTTP_X_B3_SAMPLED'])
+        B3CodecCommon.extract(carrier, Keys)
+      end
+    end
+
+    class B3TextMapCodec
+      class Keys
+        TRACE_ID = 'x-b3-traceid'.freeze
+        SPAN_ID = 'x-b3-spanid'.freeze
+        PARENT_SPAN_ID = 'x-b3-parentspanid'.freeze
+        FLAGS = 'x-b3-flags'.freeze
+        SAMPLED = 'x-b3-sampled'.freeze
+      end.freeze
+
+      def self.extract(carrier)
+        B3CodecCommon.extract(carrier, Keys)
+      end
+    end
+
+    class B3CodecCommon
+      def self.extract(carrier, keys)
+        trace_id = TraceId.base16_hex_id_to_uint64(carrier[keys::TRACE_ID])
+        span_id = TraceId.base16_hex_id_to_uint64(carrier[keys::SPAN_ID])
+        parent_id = TraceId.base16_hex_id_to_uint64(carrier[keys::PARENT_SPAN_ID])
+        flags = parse_flags(carrier[keys::FLAGS], carrier[keys::SAMPLED])
 
         return nil if span_id.nil? || trace_id.nil?
         return nil if span_id.zero? || trace_id.zero?
