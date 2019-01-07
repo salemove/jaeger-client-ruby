@@ -77,7 +77,7 @@ module Jaeger
     end
 
     class B3TextMapCodec
-      class KEYS
+      class Keys
         TRACE_ID = 'x-b3-traceid'.freeze
         SPAN_ID = 'x-b3-spanid'.freeze
         PARENT_SPAN_ID = 'x-b3-parentspanid'.freeze
