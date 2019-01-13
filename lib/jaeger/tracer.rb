@@ -41,7 +41,13 @@ module Jaeger
     # @param ignore_active_scope [Boolean] whether to create an implicit
     #   References#CHILD_OF reference to the ScopeManager#active.
     #
-    # @return [Span] The newly-started Span
+    # @yield [Span] If passed an optional block, start_span will yield the
+    #   newly-created span to the block. The span will be finished automatically
+    #   after the block is executed.
+    # @return [Span, Object] If passed an optional block, start_span will return
+    #  the block's return value, otherwise it returns the newly-started Span
+    #  instance, which has not been automatically registered via the
+    #  ScopeManager
     def start_span(operation_name,
                    child_of: nil,
                    references: nil,
@@ -55,7 +61,7 @@ module Jaeger
         references: references,
         ignore_active_scope: ignore_active_scope
       )
-      Span.new(
+      span = Span.new(
         context,
         operation_name,
         @reporter,
@@ -63,6 +69,16 @@ module Jaeger
         references: references,
         tags: tags.merge(sampler_tags)
       )
+
+      if block_given?
+        begin
+          yield(span)
+        ensure
+          span.finish
+        end
+      else
+        span
+      end
     end
 
     # Creates a newly started and activated Scope

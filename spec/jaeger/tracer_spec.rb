@@ -74,6 +74,30 @@ describe Jaeger::Tracer do
         end
       end
     end
+
+    context 'when block given' do
+      let(:span) { tracer.start_span(operation_name) }
+
+      it 'returns the block value' do
+        block_value = 'block value'
+
+        return_value = tracer.start_span(operation_name) do |_span|
+          block_value
+        end
+
+        expect(return_value).to eq(block_value)
+      end
+
+      it 'finishes the span after executing the block' do
+        span_in_block = nil
+
+        tracer.start_span(operation_name) do |span|
+          span_in_block = span
+        end
+
+        expect(span_in_block.end_time).to be_a(Time)
+      end
+    end
   end
 
   describe '#start_active_span' do
