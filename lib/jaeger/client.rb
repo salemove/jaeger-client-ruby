@@ -5,6 +5,7 @@ $LOAD_PATH.push(File.dirname(__FILE__) + '/../../thrift/gen-rb')
 require 'opentracing'
 require 'jaeger/thrift/agent'
 require 'logger'
+require 'time'
 
 require_relative 'tracer'
 require_relative 'span'
