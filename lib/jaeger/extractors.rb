@@ -57,8 +57,25 @@ module Jaeger
     end
 
     class JaegerBinaryCodec
-      def self.extract(_carrier)
-        warn 'Jaeger::Client with binary format is not supported yet'
+      def self.extract(carrier)
+        header_size = 16 + 8 + 8 + 1
+        trace_id_hi, trace_id_lo, span_id, parent_id, flags = carrier[0...header_size].unpack("Q>Q>Q>Q>C")
+        context = SpanContext.new(trace_id: trace_id_lo, parent_id: parent_id, span_id: span_id, flags: flags)
+
+        parse_pointer = header_size
+        while parse_pointer < carrier.size do
+          key_size = carrier[parse_pointer...(parse_pointer + 4)].unpack("L>")
+          parser_pointer += 4
+          key = carrier[parser_pointer...(parser_pointer + key_size)]
+          parser_pointer += key_size
+          value_size = carrier[parse_pointer...(parse_pointer + 4)].unpack("L>")
+          parser_pointer += 4
+          value = carrier[parser_pointer...(parser_pointer + value_size)]
+          parser_pointer += value_size
+          context.set_baggage_item(key, value)
+        end
+
+        context
       end
     end
 

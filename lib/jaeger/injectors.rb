@@ -31,8 +31,15 @@ module Jaeger
     end
 
     class JaegerBinaryCodec
-      def self.inject(_span_context, _carrier)
-        warn 'Jaeger::Client with binary format is not supported yet'
+      def self.inject(span_context, carrier)
+        carrier.clear
+        carrier << [0, span_context.trace_id, span_context.span_id, span_context.parent_id, span_context.flags].pack("Q>Q>Q>Q>C")
+        span_context.baggage.each do |key, value|
+          carrier << [key.size].pack("L>")
+          carrier << key.to_s
+          carrier << [value.size].pack("L>")
+          carrier << value.to_s
+        end
       end
     end
 
