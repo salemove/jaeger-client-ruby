@@ -35,10 +35,10 @@ module Jaeger
         carrier.clear
         carrier << [0, span_context.trace_id, span_context.span_id, span_context.parent_id, span_context.flags].pack("Q>Q>Q>Q>C")
         span_context.baggage.each do |key, value|
-          carrier << [key.size].pack("L>")
-          carrier << key.to_s
-          carrier << [value.size].pack("L>")
-          carrier << value.to_s
+          carrier << [key.bytesize].pack("L>")
+          carrier << key
+          carrier << [value.bytesize].pack("L>")
+          carrier << value
         end
       end
     end
