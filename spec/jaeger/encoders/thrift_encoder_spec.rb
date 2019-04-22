@@ -1,5 +1,20 @@
 require 'spec_helper'
 
+RSpec::Matchers.define :be_a_valid_thrift_span do |_|
+  match do |actual|
+    actual.instance_of?(::Jaeger::Thrift::Span) &&
+      !actual.instance_variable_get(:@traceIdLow).nil? &&
+      !actual.instance_variable_get(:@traceIdHigh).nil? &&
+      !actual.instance_variable_get(:@spanId).nil? &&
+      !actual.instance_variable_get(:@parentSpanId).nil? &&
+      !actual.instance_variable_get(:@operationName).nil? &&
+      !actual.instance_variable_get(:@flags).nil? &&
+      !actual.instance_variable_get(:@startTime).nil? &&
+      !actual.instance_variable_get(:@duration).nil? &&
+      !actual.instance_variable_get(:@tags).nil?
+  end
+end
+
 RSpec.describe Jaeger::Encoders::ThriftEncoder do
   let(:encoder) { described_class.new(service_name: service_name, tags: tags) }
   let(:service_name) { 'service-name' }
@@ -44,6 +59,45 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
       tags = encoder.encode([]).process.tags
       ip_tag = tags.detect { |tag| tag.key == 'ip' }
       expect(ip_tag.vStr).to eq(ip)
+    end
+  end
+
+  context 'when spans are encoded without limit' do
+    let(:context) do
+      Jaeger::SpanContext.new(
+        trace_id: Jaeger::TraceId.generate,
+        span_id: Jaeger::TraceId.generate,
+        flags: Jaeger::SpanContext::Flags::DEBUG
+      )
+    end
+    let(:example_span) { Jaeger::Span.new(context, 'example_op', nil) }
+
+    it 'encodes spans into one batch' do
+      encoded_batch = encoder.encode([example_span])
+      expect(encoded_batch.spans.first).to be_a_valid_thrift_span
+    end
+  end
+
+  context 'when spans are encoded with limits' do
+    let(:context) do
+      Jaeger::SpanContext.new(
+        trace_id: Jaeger::TraceId.generate,
+        span_id: Jaeger::TraceId.generate,
+        flags: Jaeger::SpanContext::Flags::DEBUG
+      )
+    end
+    let(:example_span) { Jaeger::Span.new(context, 'example_op', nil) }
+    # example span have size of 63, so let's make an array of 100 span
+    # and set the limit at 5000, so it should return a batch of 2
+    let(:example_spans) { Array.new(100, example_span) }
+
+    it 'encodes spans into multiple batches' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::CompactProtocol, 5_000)
+      expect(encoded_batches.length).to be(2)
+      expect(encoded_batches.first.spans.first).to be_a_valid_thrift_span
+      expect(encoded_batches.first.spans.last).to be_a_valid_thrift_span
+      expect(encoded_batches.last.spans.first).to be_a_valid_thrift_span
+      expect(encoded_batches.last.spans.last).to be_a_valid_thrift_span
     end
   end
 end
