@@ -16,17 +16,15 @@ module Jaeger
       def encode_limited_size(spans, protocol_class, max_message_length)
         batches = []
         current_batch = []
-        current_batch_size = 0
+        transport.flush
         spans.each do |span|
           encoded_span = encode_span(span)
-          encoded_span_size = span_byte_length(encoded_span, protocol_class)
-          if encoded_span_size + current_batch_size > max_message_length && !current_batch.empty?
+          if aggregated_span_size(encoded_span, protocol_class) > max_message_length && !current_batch.empty?
             batches << encode_batch(current_batch)
             current_batch = []
-            current_batch_size = 0
+            transport.flush
           end
           current_batch << encoded_span
-          current_batch_size += encoded_span_size
         end
         batches << encode_batch(current_batch) unless current_batch.empty?
         batches
@@ -113,16 +111,21 @@ module Jaeger
           @size += buf.size
         end
 
-        def flush; end
+        def flush
+          @size = 0
+        end
 
         def close; end
       end
 
-      def span_byte_length(span, protocol_class)
-        transport = DummyTransport.new
-        protocol = protocol_class.new(transport)
-        span.write(protocol)
+      def aggregated_span_size(span, protocol_class)
+        @protocol ||= protocol_class.new(transport)
+        span.write(@protocol)
         transport.size
+      end
+
+      def transport
+        @transport ||= DummyTransport.new
       end
     end
   end
