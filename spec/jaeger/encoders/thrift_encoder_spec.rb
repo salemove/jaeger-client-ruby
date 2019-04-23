@@ -95,7 +95,6 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
       encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::CompactProtocol, 5_000)
       expect(encoded_batches.length).to be(2)
       expect(encoded_batches.first.spans.first).to be_a_valid_thrift_span
-      expect(encoded_batches.first.spans.first).to be_a_valid_thrift_span
       expect(encoded_batches.first.spans.last).to be_a_valid_thrift_span
       expect(encoded_batches.last.spans.first).to be_a_valid_thrift_span
       expect(encoded_batches.last.spans.last).to be_a_valid_thrift_span
