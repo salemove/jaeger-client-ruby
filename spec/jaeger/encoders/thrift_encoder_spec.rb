@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec::Matchers.define :be_a_valid_span do |_|
+RSpec::Matchers.define :be_a_valid_thrift_span do |_|
   match do |actual|
     actual.instance_of?(::Jaeger::Thrift::Span) &&
       !actual.instance_variable_get(:@traceIdLow).nil? &&
@@ -72,9 +72,9 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
     end
     let(:example_span) { Jaeger::Span.new(context, 'example_op', nil) }
 
-    it 'encode successfully' do
-      encoded_span = encoder.encode([example_span])
-      expect(encoded_span.spans.first).to be_a_valid_span
+    it 'encodes spans into one batch' do
+      encoded_batch = encoder.encode([example_span])
+      expect(encoded_batch.spans.first).to be_a_valid_thrift_span
     end
   end
 
@@ -91,15 +91,14 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
     # and set the limit at 5000, so it should return a batch of 2
     let(:example_spans) { Array.new(100, example_span) }
 
-    it 'encode successfully in batches' do
-      encoded_span_batches = encoder.encode_limited_size(example_spans, ::Thrift::CompactProtocol, 5_000)
-
-      expect(encoded_span_batches.length).to be(2)
-      expect(encoded_span_batches.first.spans.first).to be_a_valid_span
-      expect(encoded_span_batches.first.spans.first).to be_a_valid_span
-      expect(encoded_span_batches.first.spans.last).to be_a_valid_span
-      expect(encoded_span_batches.last.spans.first).to be_a_valid_span
-      expect(encoded_span_batches.last.spans.last).to be_a_valid_span
+    it 'encodes spans into multiple batches' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::CompactProtocol, 5_000)
+      expect(encoded_batches.length).to be(2)
+      expect(encoded_batches.first.spans.first).to be_a_valid_thrift_span
+      expect(encoded_batches.first.spans.first).to be_a_valid_thrift_span
+      expect(encoded_batches.first.spans.last).to be_a_valid_thrift_span
+      expect(encoded_batches.last.spans.first).to be_a_valid_thrift_span
+      expect(encoded_batches.last.spans.last).to be_a_valid_thrift_span
     end
   end
 end
