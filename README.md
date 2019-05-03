@@ -119,6 +119,24 @@ Set `sampler` to
   )
 ```
 
+### TraceContext compatible header propagation
+
+It is possible to use [W3C Trace Context](https://www.w3.org/TR/trace-context/#overview) headers to propagate the tracing information.
+
+To set it up you need to change FORMAT_RACK injector and extractor.
+
+```ruby
+OpenTracing.global_tracer = Jaeger::Client.build(
+  service_name: 'service_name',
+  injectors: {
+    OpenTracing::FORMAT_RACK => [Jaeger::Injectors::TraceContextRackCodec]
+  },
+  extractors: {
+    OpenTracing::FORMAT_RACK => [Jaeger::Extractors::TraceContextRackCodec]
+  }
+)
+```
+
 ### Zipkin HTTP B3 compatible header propagation
 
 Jaeger Tracer supports Zipkin B3 Propagation HTTP headers, which are used by a lot of Zipkin tracers. This means that you can use Jaeger in conjunction with OpenZipkin tracers.

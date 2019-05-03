@@ -51,6 +51,20 @@ module Jaeger
       end
     end
 
+    class TraceContextRackCodec
+      def self.inject(span_context, carrier)
+        flags = span_context.sampled? || span_context.debug? ? 1 : 0
+
+        carrier['traceparent'] = format(
+          '%<version>s-%<trace_id>s-%<span_id>s-%<flags>s',
+          version: '00',
+          trace_id: span_context.trace_id.to_s(16).rjust(32, '0'),
+          span_id: span_context.span_id.to_s(16).rjust(16, '0'),
+          flags: flags.to_s(16).rjust(2, '0')
+        )
+      end
+    end
+
     DEFAULT_INJECTORS = {
       OpenTracing::FORMAT_TEXT_MAP => JaegerTextMapCodec,
       OpenTracing::FORMAT_BINARY => JaegerBinaryCodec,

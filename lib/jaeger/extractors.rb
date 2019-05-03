@@ -121,6 +121,34 @@ module Jaeger
       private_class_method :parse_flags
     end
 
+    class TraceContextRackCodec
+      # Internal regex used to identify the TraceContext version
+      VERSION_PATTERN = /^([0-9a-fA-F]{2})-(.+)$/
+
+      # Internal regex used to parse fields in version 0
+      HEADER_V0_PATTERN = /^([0-9a-fA-F]{32})-([0-9a-fA-F]{16})(-([0-9a-fA-F]{2}))?$/
+
+      def self.extract(carrier)
+        header_value = carrier['HTTP_TRACEPARENT']
+
+        version_match = VERSION_PATTERN.match(header_value)
+        return nil unless version_match
+
+        # We currently only support version 0
+        return nil if version_match[1].to_i(16) != 0
+
+        match = HEADER_V0_PATTERN.match(version_match[2])
+        return nil unless match
+
+        trace_id = TraceId.base16_hex_id_to_uint128(match[1])
+        span_id = TraceId.base16_hex_id_to_uint64(match[2])
+        flags = TraceId.base16_hex_id_to_uint64(match[4])
+        return nil if trace_id.zero? || span_id.zero?
+
+        SpanContext.new(trace_id: trace_id, span_id: span_id, flags: flags)
+      end
+    end
+
     DEFAULT_EXTRACTORS = {
       OpenTracing::FORMAT_TEXT_MAP => JaegerTextMapCodec,
       OpenTracing::FORMAT_BINARY => JaegerBinaryCodec,
