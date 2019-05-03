@@ -41,8 +41,8 @@ module Jaeger
         start_ts, duration = build_timestamps(span)
 
         Jaeger::Thrift::Span.new(
-          'traceIdLow' => TraceId.uint64_id_to_int64(context.trace_id),
-          'traceIdHigh' => 0,
+          'traceIdLow' => TraceId.uint64_id_to_int64(trace_id_to_low(context.trace_id)),
+          'traceIdHigh' => TraceId.uint64_id_to_int64(trace_id_to_high(context.trace_id)),
           'spanId' => TraceId.uint64_id_to_int64(context.span_id),
           'parentSpanId' => TraceId.uint64_id_to_int64(context.parent_id),
           'operationName' => span.operation_name,
@@ -98,6 +98,16 @@ module Jaeger
         with_default_tags.map do |key, value|
           ThriftTagBuilder.build(key, value)
         end
+      end
+
+      # Returns the right most 64 bits of trace id
+      def trace_id_to_low(trace_id)
+        trace_id & TraceId::MAX_64BIT_UNSIGNED_INT
+      end
+
+      # Returns the left most 64 bits of trace id
+      def trace_id_to_high(trace_id)
+        (trace_id >> 64) & TraceId::MAX_64BIT_UNSIGNED_INT
       end
 
       class DummyTransport

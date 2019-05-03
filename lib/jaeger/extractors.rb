@@ -6,10 +6,12 @@ module Jaeger
       def self.parse(trace)
         return nil if !trace || trace == ''
 
-        trace_arguments = trace.split(':').map(&TraceId.method(:base16_hex_id_to_uint64))
+        trace_arguments = trace.split(':')
         return nil if trace_arguments.size != 4
 
-        trace_id, span_id, parent_id, flags = trace_arguments
+        trace_id = TraceId.base16_hex_id_to_uint128(trace_arguments[0])
+        span_id, parent_id, flags = trace_arguments[1..3].map(&TraceId.method(:base16_hex_id_to_uint64))
+
         return nil if trace_id.zero? || span_id.zero?
 
         SpanContext.new(
