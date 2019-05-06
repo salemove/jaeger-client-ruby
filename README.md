@@ -109,8 +109,8 @@ Set `sampler` to
   Jaeger::Samplers::PerOperation.new(
     strategies: {
       per_operation_strategies: [
-        { operation: 'GET /articles', probabilistic_sampling: 0.5 },
-        { operation: 'POST /articles', probabilistic_sampling: 1.0 }
+        { operation: 'GET /articles', probabilistic_sampling: { sampling_rate: 0.5 } },
+        { operation: 'POST /articles', probabilistic_sampling: { sampling_rate: 1.0 } }
       ],
       default_sampling_probability: 0.001,
       default_lower_bound_traces_per_second: 1.0 / (10.0 * 60.0)
