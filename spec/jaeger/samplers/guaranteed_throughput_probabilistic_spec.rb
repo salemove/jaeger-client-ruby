@@ -14,7 +14,7 @@ RSpec.describe Jaeger::Samplers::GuaranteedThroughputProbabilistic do
 
   let(:max_traces_per_second) { 10 }
   let(:sample_args) { { trace_id: trace_id } }
-  let(:sample_result) { sampler.sample?(sample_args) }
+  let(:sample_result) { sampler.sample(sample_args) }
   let(:is_sampled) { sample_result[0] }
   let(:tags) { sample_result[1] }
 
@@ -24,7 +24,7 @@ RSpec.describe Jaeger::Samplers::GuaranteedThroughputProbabilistic do
 
     context 'when lower bound return false' do
       before do
-        allow(lower_bound_sampler).to receive(:sample?)
+        allow(lower_bound_sampler).to receive(:sample)
           .and_return([false, {}])
       end
 
@@ -42,7 +42,7 @@ RSpec.describe Jaeger::Samplers::GuaranteedThroughputProbabilistic do
 
     context 'when lower bound sampler returns true' do
       before do
-        allow(lower_bound_sampler).to receive(:sample?)
+        allow(lower_bound_sampler).to receive(:sample)
           .and_return([true, {}])
       end
 
@@ -64,7 +64,7 @@ RSpec.describe Jaeger::Samplers::GuaranteedThroughputProbabilistic do
     let(:trace_id) { Jaeger::TraceId.generate }
 
     before do
-      allow(lower_bound_sampler).to receive(:sample?)
+      allow(lower_bound_sampler).to receive(:sample)
     end
 
     it 'returns true for every trace' do
@@ -79,7 +79,7 @@ RSpec.describe Jaeger::Samplers::GuaranteedThroughputProbabilistic do
     end
 
     it 'calls lower bound sampler' do
-      expect(lower_bound_sampler).to receive(:sample?).with(sample_args)
+      expect(lower_bound_sampler).to receive(:sample).with(sample_args)
       is_sampled
     end
   end

@@ -28,10 +28,10 @@ module Jaeger
         end
       end
 
-      def sample?(*args)
+      def sample(*args)
         @poll_executor.start(&method(:poll)) unless @poll_executor.running?
 
-        @sampler.sample?(*args)
+        @sampler.sample(*args)
       end
 
       def poll

@@ -30,7 +30,7 @@ module Jaeger
         true
       end
 
-      def sample?(trace_id:, **)
+      def sample(trace_id:, **)
         [@boundary >= trace_id, @tags]
       end
     end

@@ -43,7 +43,7 @@ module Jaeger
         true
       end
 
-      def sample?(*)
+      def sample(*)
         [@rate_limiter.check_credit(1.0), @tags]
       end
     end

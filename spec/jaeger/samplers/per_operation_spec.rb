@@ -22,20 +22,20 @@ RSpec.describe Jaeger::Samplers::PerOperation do
       end
 
       it 'uses lower bound sampler' do
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(is_sampled).to eq(true)
 
         # false because limit is full
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(is_sampled).to eq(false)
 
         # true because different operation
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'bar'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'bar'))
         expect(is_sampled).to eq(true)
       end
 
       it 'returns tags with lower bound param' do
-        _is_sampled, tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        _is_sampled, tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(tags).to eq(
           'sampler.type' => 'lowerbound',
           'sampler.param' => 0
@@ -55,23 +55,23 @@ RSpec.describe Jaeger::Samplers::PerOperation do
       end
 
       it 'uses operation probabilistic sampler' do
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(is_sampled).to eq(true)
 
         # true because rate is set to 1
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(is_sampled).to eq(true)
 
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'bar'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'bar'))
         expect(is_sampled).to eq(true)
 
         # false because different operation and lower boundary is full
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'bar'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'bar'))
         expect(is_sampled).to eq(false)
       end
 
       it 'returns tags with lower bound param' do
-        _is_sampled, tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        _is_sampled, tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(tags).to eq(
           'sampler.type' => 'probabilistic',
           'sampler.param' => 1.0
@@ -90,20 +90,20 @@ RSpec.describe Jaeger::Samplers::PerOperation do
       end
 
       it 'uses lower bound sampler' do
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(is_sampled).to eq(true)
 
         # false because limit is full
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(is_sampled).to eq(false)
 
         # true because different operation
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'bar'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'bar'))
         expect(is_sampled).to eq(true)
       end
 
       it 'returns tags with lower bound param' do
-        _is_sampled, tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        _is_sampled, tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(tags).to eq(
           'sampler.type' => 'lowerbound',
           'sampler.param' => 0
@@ -120,15 +120,15 @@ RSpec.describe Jaeger::Samplers::PerOperation do
       end
 
       it 'uses probabilistic sampling which returns always true' do
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(is_sampled).to eq(true)
 
-        is_sampled, _tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        is_sampled, _tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(is_sampled).to eq(true)
       end
 
       it 'returns tags with lower bound param' do
-        _is_sampled, tags = sampler.sample?(sample_args(operation_name: 'foo'))
+        _is_sampled, tags = sampler.sample(sample_args(operation_name: 'foo'))
         expect(tags).to eq(
           'sampler.type' => 'probabilistic',
           'sampler.param' => 1

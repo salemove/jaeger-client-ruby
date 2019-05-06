@@ -175,7 +175,7 @@ module Jaeger
         [SpanContext.create_from_parent_context(context), {}]
       else
         trace_id = TraceId.generate
-        is_sampled, tags = @sampler.sample?(
+        is_sampled, tags = @sampler.sample(
           trace_id: trace_id,
           operation_name: operation_name
         )

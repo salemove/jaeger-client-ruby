@@ -37,19 +37,19 @@ module Jaeger
         is_updated
       end
 
-      def sample?(opts)
+      def sample(opts)
         operation_name = opts.fetch(:operation_name)
         sampler = @samplers[operation_name]
-        return sampler.sample?(opts) if sampler
+        return sampler.sample(opts) if sampler
 
-        return @default_sampler.sample?(opts) if @samplers.length >= @max_operations
+        return @default_sampler.sample(opts) if @samplers.length >= @max_operations
 
         sampler = GuaranteedThroughputProbabilistic.new(
           lower_bound: @lower_bound,
           rate: @default_sampling_probability
         )
         @samplers[operation_name] = sampler
-        sampler.sample?(opts)
+        sampler.sample(opts)
       end
 
       private

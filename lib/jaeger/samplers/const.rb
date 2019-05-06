@@ -16,7 +16,7 @@ module Jaeger
         }
       end
 
-      def sample?(*)
+      def sample(*)
         [@decision, @tags]
       end
     end
