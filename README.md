@@ -124,6 +124,7 @@ Set `sampler` to
 `RemoteControlled` sampler is a sampler that is controller by jaeger agent. It starts out with `Probabilistic` sampler. It polls the jaeger-agent and changes sampling strategy accordingly. Set `sampler` to `Jaeger::Client::Samplers::RemoteControlled.new(service_name: 'service_name')`.
 
 RemoteControlled sampler options:
+
 | Param             | Required | Description |
 |-------------------|----------|-------------|
 | service_name      | x | name of the current service / application, same as given to Tracer |
