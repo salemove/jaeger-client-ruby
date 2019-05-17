@@ -4,6 +4,7 @@ module Jaeger
   class UdpSender
     class Transport
       FLAGS = 0
+      MAX_PACKET_SIZE = 65_507
 
       def initialize(host, port)
         @socket = UDPSocket.new
@@ -13,6 +14,8 @@ module Jaeger
       end
 
       def write(str)
+        buffer_size = str.bytesize + @buffer.available
+        flush if buffer_size > MAX_PACKET_SIZE
         @buffer.write(str)
       end
 
