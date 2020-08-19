@@ -8,8 +8,10 @@ describe Jaeger::Extractors::B3TextMapCodec do
   let(:parent_id) { '8e5a8c5509c8dcc1' }
   let(:span_id) { 'aba8be8d019abed2' }
   let(:flags) { '1' }
-  let(:hexa_max_uint64) { 'ff' * 8 }
+  let(:hexa_max_uint64) { 'f' * 16 }
+  let(:hexa_max_uint128) { 'f' * 32 }
   let(:max_uint64) { 2**64 - 1 }
+  let(:max_uint128) { 2**128 - 1 }
 
   context 'when header x-b3-sampled is present' do
     let(:carrier) do
@@ -28,6 +30,14 @@ describe Jaeger::Extractors::B3TextMapCodec do
 
       it 'interprets it correctly' do
         expect(span_context.trace_id).to eq(max_uint64)
+      end
+    end
+
+    context 'when trace-id is a max uint128' do
+      let(:trace_id) { hexa_max_uint128 }
+
+      it 'interprets it correctly' do
+        expect(span_context.trace_id).to eq(max_uint128)
       end
     end
 
