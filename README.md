@@ -26,6 +26,9 @@ OpenTracing.start_active_span('span name') do
     # do something else
   end
 end
+
+# don't kill the program too soon, allow time for the background reporter to send the traces
+sleep 2
 ```
 
 See [opentracing-ruby](https://github.com/opentracing/opentracing-ruby) for more examples.
