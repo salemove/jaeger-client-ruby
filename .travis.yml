@@ -1,13 +1,14 @@
 sudo: false
-
 language: ruby
+
 rvm:
-  - 2.5.0
+  - 2.7.2
 
 services:
   - docker
 
-before_install: gem install bundler -v 1.17.2
+before_install:
+  - gem install bundler
 
 script:
   - bundle exec rake
