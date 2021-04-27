@@ -16,7 +16,7 @@ RSpec.describe Jaeger::Span do
     end
 
     it 'adds log to span' do
-      span.log_kv(fields)
+      span.log_kv(**fields)
 
       expect(span.logs.count).to eq(1)
       thrift_log = span.logs[0]
@@ -26,7 +26,7 @@ RSpec.describe Jaeger::Span do
 
     it 'adds log to span with specific timestamp' do
       timestamp = Time.now
-      span.log_kv(fields.merge(timestamp: timestamp))
+      span.log_kv(**fields.merge(timestamp: timestamp))
 
       expect(span.logs.count).to eq(1)
       thrift_log = span.logs[0]

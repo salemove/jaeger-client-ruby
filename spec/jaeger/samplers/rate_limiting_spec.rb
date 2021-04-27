@@ -4,7 +4,7 @@ RSpec.describe Jaeger::Samplers::RateLimiting do
   let(:sampler) { described_class.new(max_traces_per_second: max_traces_per_second) }
   let(:max_traces_per_second) { 10 }
   let(:sample_args) { { trace_id: Jaeger::TraceId.generate } }
-  let(:sample_result) { sampler.sample(sample_args) }
+  let(:sample_result) { sampler.sample(**sample_args) }
   let(:is_sampled) { sample_result[0] }
   let(:tags) { sample_result[1] }
 

@@ -71,9 +71,9 @@ module Jaeger
     # Add a log entry to this span
     #
     # @deprecated Use {#log_kv} instead.
-    def log(*args)
+    def log(**args)
       warn 'Span#log is deprecated. Please use Span#log_kv instead.'
-      log_kv(*args)
+      log_kv(**args)
     end
 
     # Add a log entry to this span

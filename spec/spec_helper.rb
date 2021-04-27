@@ -13,7 +13,7 @@ RSpec.configure do |config|
   end
 
   def build_span_context(opts = {})
-    Jaeger::SpanContext.new({
+    Jaeger::SpanContext.new(**{
       trace_id: Jaeger::TraceId.generate,
       span_id: Jaeger::TraceId.generate,
       flags: Jaeger::SpanContext::Flags::SAMPLED
@@ -25,6 +25,6 @@ RSpec.configure do |config|
     operation_name = opts.delete(:operation_name) || 'operation-name'
     reporter = opts.delete(:reporter) || Jaeger::Reporters::NullReporter.new
 
-    Jaeger::Span.new(span_context, operation_name, reporter, opts)
+    Jaeger::Span.new(span_context, operation_name, reporter, **opts)
   end
 end
