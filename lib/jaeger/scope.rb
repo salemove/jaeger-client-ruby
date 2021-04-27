@@ -23,6 +23,7 @@ module Jaeger
     # updating the ScopeManager#active in the process.
     def close
       raise "Tried to close already closed span: #{inspect}" if @closed
+
       @closed = true
 
       @span.finish if @finish_on_close

@@ -15,10 +15,10 @@ describe Jaeger::Extractors::B3TextMapCodec do
 
   context 'when header x-b3-sampled is present' do
     let(:carrier) do
-      { 'x-b3-traceid'      => trace_id,
-        'x-b3-spanid'       => span_id,
+      { 'x-b3-traceid' => trace_id,
+        'x-b3-spanid' => span_id,
         'x-b3-parentspanid' => parent_id,
-        'x-b3-sampled'      => flags }
+        'x-b3-sampled' => flags }
     end
 
     it 'has flags' do
@@ -84,10 +84,10 @@ describe Jaeger::Extractors::B3TextMapCodec do
 
   context 'when header x-b3-flags is present' do
     let(:carrier) do
-      { 'x-b3-traceid'      => trace_id,
-        'x-b3-spanid'       => span_id,
+      { 'x-b3-traceid' => trace_id,
+        'x-b3-spanid' => span_id,
         'x-b3-parentspanid' => parent_id,
-        'x-b3-flags'        => '1' }
+        'x-b3-flags' => '1' }
     end
 
     it 'sets the DEBUG flag' do

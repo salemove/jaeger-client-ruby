@@ -15,10 +15,10 @@ describe Jaeger::Extractors::B3RackCodec do
 
   context 'when header HTTP_X_B3_SAMPLED is present' do
     let(:carrier) do
-      { 'HTTP_X_B3_TRACEID'      => trace_id,
-        'HTTP_X_B3_SPANID'       => span_id,
+      { 'HTTP_X_B3_TRACEID' => trace_id,
+        'HTTP_X_B3_SPANID' => span_id,
         'HTTP_X_B3_PARENTSPANID' => parent_id,
-        'HTTP_X_B3_SAMPLED'      => flags }
+        'HTTP_X_B3_SAMPLED' => flags }
     end
 
     it 'has flags' do
@@ -84,10 +84,10 @@ describe Jaeger::Extractors::B3RackCodec do
 
   context 'when header HTTP_X_B3_FLAGS is present' do
     let(:carrier) do
-      { 'HTTP_X_B3_TRACEID'      => trace_id,
-        'HTTP_X_B3_SPANID'       => span_id,
+      { 'HTTP_X_B3_TRACEID' => trace_id,
+        'HTTP_X_B3_SPANID' => span_id,
         'HTTP_X_B3_PARENTSPANID' => parent_id,
-        'HTTP_X_B3_FLAGS'        => '1' }
+        'HTTP_X_B3_FLAGS' => '1' }
     end
 
     it 'sets the DEBUG flag' do

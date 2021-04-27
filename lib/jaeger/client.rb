@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-$LOAD_PATH.push(File.dirname(__FILE__) + '/../../thrift/gen-rb')
+$LOAD_PATH.push("#{File.dirname(__FILE__)}/../../thrift/gen-rb")
 
 require 'opentracing'
 require 'jaeger/thrift/agent'
@@ -43,12 +43,11 @@ module Jaeger
 
     DEFAULT_FLUSH_INTERVAL = 10
 
-    def self.build(host: '127.0.0.1',
+    def self.build(service_name:, host: '127.0.0.1',
                    port: 6831,
-                   service_name:,
                    flush_interval: DEFAULT_FLUSH_INTERVAL,
                    sampler: Samplers::Const.new(true),
-                   logger: Logger.new(STDOUT),
+                   logger: Logger.new($stdout),
                    sender: nil,
                    reporter: nil,
                    injectors: {},

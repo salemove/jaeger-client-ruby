@@ -6,7 +6,7 @@ module Jaeger
   module Samplers
     class RemoteControlled
       DEFAULT_REFRESH_INTERVAL = 60
-      DEFAULT_SAMPLING_HOST = 'localhost'.freeze
+      DEFAULT_SAMPLING_HOST = 'localhost'
       DEFAULT_SAMPLING_PORT = 5778
 
       attr_reader :sampler

@@ -4,7 +4,7 @@ require 'logger'
 
 module Jaeger
   class HttpSender
-    def initialize(url:, headers: {}, encoder:, logger: Logger.new(STDOUT))
+    def initialize(url:, encoder:, headers: {}, logger: Logger.new($stdout))
       @encoder = encoder
       @logger = logger
 
@@ -21,8 +21,8 @@ module Jaeger
       batch = @encoder.encode(spans)
       @transport.write(@serializer.serialize(batch))
       @transport.flush
-    rescue StandardError => error
-      @logger.error("Failure while sending a batch of spans: #{error}")
+    rescue StandardError => e
+      @logger.error("Failure while sending a batch of spans: #{e}")
     end
   end
 end

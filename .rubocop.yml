@@ -1,8 +1,11 @@
 require: rubocop-rspec
 
+
 AllCops:
+  TargetRubyVersion: 2.7.2
   Exclude:
     - 'thrift/**/*'
+  NewCops: enable
 
 Style/Documentation:
   Enabled: no
@@ -16,10 +19,13 @@ RSpec/NestedGroups:
 RSpec/ExampleLength:
   Enabled: no
 
+RSpec/MessageSpies:
+  Enabled: no
+
 RSpec/MultipleExpectations:
   Enabled: no
 
-RSpec/MessageSpies:
+RSpec/MultipleMemoizedHelpers:
   Enabled: no
 
 Metrics/BlockLength:
