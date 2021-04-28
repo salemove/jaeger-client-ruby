@@ -5,12 +5,15 @@ ENV APP_HOME /app
 # git is required by bundler to run jaeger gem with local path
 RUN apk add --no-cache git
 
+
 # Add only files needed for installing gem dependencies. This allows us to
 # change other files without needing to install gems every time when building
 # the docker image.
 ADD Gemfile Gemfile.lock jaeger-client.gemspec $APP_HOME/
 ADD lib/jaeger/client/version.rb $APP_HOME/lib/jaeger/client/
 ADD crossdock/Gemfile crossdock/Gemfile.lock $APP_HOME/crossdock/
+
+RUN gem install bundler -v $(tail -n 1 $APP_HOME/Gemfile.lock | awk '{$1=$1};1')
 
 RUN apk add --no-cache --virtual .app-builddeps build-base \
   && cd $APP_HOME && bundle install \
