@@ -3,6 +3,7 @@ language: ruby
 
 rvm:
   - 2.7.2
+  - 3.0
 
 services:
   - docker

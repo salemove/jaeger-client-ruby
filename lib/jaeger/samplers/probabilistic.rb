@@ -30,7 +30,9 @@ module Jaeger
         true
       end
 
-      def sample(trace_id:, **)
+      def sample(opts)
+        trace_id = opts.fetch(:trace_id)
+
         [@boundary >= trace_id, @tags]
       end
     end

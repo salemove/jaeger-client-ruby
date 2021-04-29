@@ -3,6 +3,8 @@ require: rubocop-rspec
 AllCops:
   Exclude:
     - 'thrift/**/*'
+  NewCops: enable
+  TargetRubyVersion: '2.7'
 
 Style/Documentation:
   Enabled: no
@@ -17,6 +19,9 @@ RSpec/ExampleLength:
   Enabled: no
 
 RSpec/MultipleExpectations:
+  Enabled: no
+
+RSpec/MultipleMemoizedHelpers:
   Enabled: no
 
 RSpec/MessageSpies:
@@ -46,7 +51,7 @@ Style/FrozenStringLiteralComment:
   Include:
     - 'lib/**/*'
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 120
 
 Style/SingleLineMethods:

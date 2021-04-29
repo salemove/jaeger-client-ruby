@@ -11,19 +11,20 @@ module Jaeger
     VSTR = FIELDS[Jaeger::Thrift::Tag::VSTR].fetch(:name)
 
     def self.build(key, value)
-      if value.is_a?(Integer)
+      case value
+      when Integer
         Jaeger::Thrift::Tag.new(
           KEY => key.to_s,
           VTYPE => Jaeger::Thrift::TagType::LONG,
           VLONG => value
         )
-      elsif value.is_a?(Float)
+      when Float
         Jaeger::Thrift::Tag.new(
           KEY => key.to_s,
           VTYPE => Jaeger::Thrift::TagType::DOUBLE,
           VDOUBLE => value
         )
-      elsif value.is_a?(TrueClass) || value.is_a?(FalseClass)
+      when TrueClass, FalseClass
         Jaeger::Thrift::Tag.new(
           KEY => key.to_s,
           VTYPE => Jaeger::Thrift::TagType::BOOL,

@@ -36,9 +36,10 @@ class HttpServer < Sinatra::Application
       transport = downstream['transport']
 
       response[:downstream] =
-        if transport == 'HTTP'
+        case transport
+        when 'HTTP'
           call_downstream_http(downstream, server_span)
-        elsif transport == 'DUMMY'
+        when 'DUMMY'
           { notImplementedError: 'Dummy has not been implemented' }
         else
           { notImplementedError: "Unrecognized transport received: #{transport}" }
@@ -69,9 +70,10 @@ class HttpServer < Sinatra::Application
       transport = downstream['transport']
 
       response[:downstream] =
-        if transport == 'HTTP'
+        case transport
+        when 'HTTP'
           call_downstream_http(downstream, server_span)
-        elsif transport == 'DUMMY'
+        when 'DUMMY'
           { notImplementedError: 'Dummy has not been implemented' }
         else
           { notImplementedError: "Unrecognized transport received: #{transport}" }

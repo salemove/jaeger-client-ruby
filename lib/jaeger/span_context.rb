@@ -19,10 +19,10 @@ module Jaeger
       )
     end
 
-    attr_reader :span_id, :parent_id, :trace_id, :baggage, :flags
-    attr_writer :flags
+    attr_accessor :flags
+    attr_reader :span_id, :parent_id, :trace_id, :baggage
 
-    def initialize(span_id:, parent_id: 0, trace_id:, flags:, baggage: {})
+    def initialize(span_id:, trace_id:, flags:, parent_id: 0, baggage: {})
       @span_id = span_id
       @parent_id = parent_id
       @trace_id = trace_id
