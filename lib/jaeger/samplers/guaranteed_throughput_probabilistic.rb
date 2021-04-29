@@ -30,16 +30,16 @@ module Jaeger
         is_updated
       end
 
-      def sample(*args)
-        is_sampled, probabilistic_tags = @probabilistic_sampler.sample(*args)
+      def sample(...)
+        is_sampled, probabilistic_tags = @probabilistic_sampler.sample(...)
         if is_sampled
           # We still call lower_bound_sampler to update the rate limiter budget
-          @lower_bound_sampler.sample(*args)
+          @lower_bound_sampler.sample(...)
 
           return [is_sampled, probabilistic_tags]
         end
 
-        is_sampled, _tags = @lower_bound_sampler.sample(*args)
+        is_sampled, _tags = @lower_bound_sampler.sample(...)
         [is_sampled, @lower_bound_tags]
       end
     end

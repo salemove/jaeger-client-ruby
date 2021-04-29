@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe Jaeger::Samplers::Probabilistic do
   let(:sampler) { described_class.new(rate: rate) }
   let(:sample_args) { { trace_id: trace_id } }
-  let(:sample_result) { sampler.sample(sample_args) }
+  let(:sample_result) { sampler.sample(**sample_args) }
   let(:is_sampled) { sample_result[0] }
   let(:tags) { sample_result[1] }
 

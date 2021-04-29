@@ -61,7 +61,7 @@ RSpec.describe Jaeger::SpanContext do
   end
 
   def build_span_context(opts)
-    described_class.new({
+    described_class.new(**{
       trace_id: Jaeger::TraceId.generate,
       span_id: Jaeger::TraceId.generate,
       flags: 0

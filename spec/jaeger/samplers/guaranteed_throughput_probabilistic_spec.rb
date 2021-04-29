@@ -14,7 +14,7 @@ RSpec.describe Jaeger::Samplers::GuaranteedThroughputProbabilistic do
 
   let(:max_traces_per_second) { 10 }
   let(:sample_args) { { trace_id: trace_id } }
-  let(:sample_result) { sampler.sample(sample_args) }
+  let(:sample_result) { sampler.sample(**sample_args) }
   let(:is_sampled) { sample_result[0] }
   let(:tags) { sample_result[1] }
 

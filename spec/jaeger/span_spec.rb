@@ -1,6 +1,24 @@
 require 'spec_helper'
 
 RSpec.describe Jaeger::Span do
+  describe '#log' do
+    let(:span) { described_class.new(nil, 'operation_name', nil) }
+
+    it 'is deprecated' do
+      expect { span.log(key: 'value') }
+        .to output(/Span#log is deprecated/).to_stderr
+    end
+
+    it 'delegates to #log_kv' do
+      allow(span).to receive(:log_kv)
+
+      args = { key: 'value' }
+      span.log(**args)
+
+      expect(span).to have_received(:log_kv).with(**args)
+    end
+  end
+
   describe '#log_kv' do
     let(:span) { described_class.new(nil, 'operation_name', nil) }
     let(:fields) { { key1: 'value1', key2: 69 } }
@@ -16,7 +34,7 @@ RSpec.describe Jaeger::Span do
     end
 
     it 'adds log to span' do
-      span.log_kv(fields)
+      span.log_kv(**fields)
 
       expect(span.logs.count).to eq(1)
       thrift_log = span.logs[0]
@@ -26,7 +44,7 @@ RSpec.describe Jaeger::Span do
 
     it 'adds log to span with specific timestamp' do
       timestamp = Time.now
-      span.log_kv(fields.merge(timestamp: timestamp))
+      span.log_kv(**fields.merge(timestamp: timestamp))
 
       expect(span.logs.count).to eq(1)
       thrift_log = span.logs[0]
