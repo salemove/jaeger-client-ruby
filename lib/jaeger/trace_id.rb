@@ -15,14 +15,14 @@ module Jaeger
       return nil unless id
 
       value = id.to_i(16)
-      value > MAX_64BIT_UNSIGNED_INT || value < 0 ? 0 : value
+      value > MAX_64BIT_UNSIGNED_INT || value.negative? ? 0 : value
     end
 
     def self.base16_hex_id_to_uint128(id)
       return nil unless id
 
       value = id.to_i(16)
-      value > MAX_128BIT_UNSIGNED_INT || value < 0 ? 0 : value
+      value > MAX_128BIT_UNSIGNED_INT || value.negative? ? 0 : value
     end
 
     # Thrift defines ID fields as i64, which is signed, therefore we convert

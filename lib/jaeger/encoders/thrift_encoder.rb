@@ -87,7 +87,7 @@ module Jaeger
 
       def prepare_tags(tags)
         with_default_tags = tags.dup
-        with_default_tags['jaeger.version'] = 'Ruby-' + Jaeger::Client::VERSION
+        with_default_tags['jaeger.version'] = "Ruby-#{Jaeger::Client::VERSION}"
         with_default_tags['hostname'] ||= Socket.gethostname
 
         unless with_default_tags['ip']

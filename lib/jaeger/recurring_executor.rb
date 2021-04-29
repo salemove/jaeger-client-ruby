@@ -24,7 +24,7 @@ module Jaeger
     end
 
     def running?
-      @thread && @thread.alive?
+      @thread&.alive?
     end
 
     def stop

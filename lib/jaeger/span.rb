@@ -34,7 +34,7 @@ module Jaeger
     # a String, Numeric, or Boolean it will be encoded with to_s
     def set_tag(key, value)
       if key == 'sampling.priority'
-        if value.to_i > 0
+        if value.to_i.positive?
           return self if @context.debug?
 
           @context.flags = @context.flags | SpanContext::Flags::SAMPLED | SpanContext::Flags::DEBUG

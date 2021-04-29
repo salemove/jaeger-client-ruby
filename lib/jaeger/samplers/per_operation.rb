@@ -32,9 +32,7 @@ module Jaeger
           @default_sampler = Probabilistic.new(rate: @default_sampling_probability)
         end
 
-        is_updated = update_operation_strategies(strategies) || is_updated
-
-        is_updated
+        update_operation_strategies(strategies) || is_updated
       end
 
       def sample(opts)

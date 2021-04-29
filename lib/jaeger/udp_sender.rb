@@ -19,8 +19,8 @@ module Jaeger
     def send_spans(spans)
       batches = @encoder.encode_limited_size(spans, @protocol_class, @max_packet_size)
       batches.each { |batch| @client.emitBatch(batch) }
-    rescue StandardError => error
-      @logger.error("Failure while sending a batch of spans: #{error}")
+    rescue StandardError => e
+      @logger.error("Failure while sending a batch of spans: #{e}")
     end
   end
 end

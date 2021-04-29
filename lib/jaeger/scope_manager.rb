@@ -27,6 +27,7 @@ module Jaeger
     #  returned instance.
     def activate(span, finish_on_close: true)
       return active if active && active.span == span
+
       scope = Scope.new(span, @scope_stack, finish_on_close: finish_on_close)
       @scope_stack.push(scope)
       scope

@@ -66,11 +66,11 @@ module Jaeger
 
     class B3RackCodec
       class Keys
-        TRACE_ID = 'HTTP_X_B3_TRACEID'.freeze
-        SPAN_ID = 'HTTP_X_B3_SPANID'.freeze
-        PARENT_SPAN_ID = 'HTTP_X_B3_PARENTSPANID'.freeze
-        FLAGS = 'HTTP_X_B3_FLAGS'.freeze
-        SAMPLED = 'HTTP_X_B3_SAMPLED'.freeze
+        TRACE_ID = 'HTTP_X_B3_TRACEID'
+        SPAN_ID = 'HTTP_X_B3_SPANID'
+        PARENT_SPAN_ID = 'HTTP_X_B3_PARENTSPANID'
+        FLAGS = 'HTTP_X_B3_FLAGS'
+        SAMPLED = 'HTTP_X_B3_SAMPLED'
       end.freeze
 
       def self.extract(carrier)
@@ -80,11 +80,11 @@ module Jaeger
 
     class B3TextMapCodec
       class Keys
-        TRACE_ID = 'x-b3-traceid'.freeze
-        SPAN_ID = 'x-b3-spanid'.freeze
-        PARENT_SPAN_ID = 'x-b3-parentspanid'.freeze
-        FLAGS = 'x-b3-flags'.freeze
-        SAMPLED = 'x-b3-sampled'.freeze
+        TRACE_ID = 'x-b3-traceid'
+        SPAN_ID = 'x-b3-spanid'
+        PARENT_SPAN_ID = 'x-b3-parentspanid'
+        FLAGS = 'x-b3-flags'
+        SAMPLED = 'x-b3-sampled'
       end.freeze
 
       def self.extract(carrier)
@@ -129,10 +129,10 @@ module Jaeger
 
     class TraceContextRackCodec
       # Internal regex used to identify the TraceContext version
-      VERSION_PATTERN = /^([0-9a-fA-F]{2})-(.+)$/
+      VERSION_PATTERN = /^([0-9a-fA-F]{2})-(.+)$/.freeze
 
       # Internal regex used to parse fields in version 0
-      HEADER_V0_PATTERN = /^([0-9a-fA-F]{32})-([0-9a-fA-F]{16})(-([0-9a-fA-F]{2}))?$/
+      HEADER_V0_PATTERN = /^([0-9a-fA-F]{32})-([0-9a-fA-F]{16})(-([0-9a-fA-F]{2}))?$/.freeze
 
       def self.extract(carrier)
         header_value = carrier['HTTP_TRACEPARENT']

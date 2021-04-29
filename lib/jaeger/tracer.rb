@@ -19,7 +19,7 @@ module Jaeger
     #   Scope#active is nil.
     def active_span
       scope = scope_manager.active
-      scope.span if scope
+      scope&.span
     end
 
     # Starts a new span.
@@ -190,6 +190,7 @@ module Jaeger
 
     def context_from_child_of(child_of)
       return nil unless child_of
+
       child_of.respond_to?(:context) ? child_of.context : child_of
     end
 
@@ -207,7 +208,7 @@ module Jaeger
       return if ignore_active_scope
 
       active_scope = @scope_manager.active
-      active_scope.span.context if active_scope
+      active_scope&.span&.context
     end
   end
 end
