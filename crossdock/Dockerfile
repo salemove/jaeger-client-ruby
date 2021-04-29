@@ -1,4 +1,4 @@
-FROM ruby:2.5-alpine
+FROM ruby:2.7-alpine
 
 ENV APP_HOME /app
 
@@ -11,6 +11,8 @@ RUN apk add --no-cache git
 ADD Gemfile Gemfile.lock jaeger-client.gemspec $APP_HOME/
 ADD lib/jaeger/client/version.rb $APP_HOME/lib/jaeger/client/
 ADD crossdock/Gemfile crossdock/Gemfile.lock $APP_HOME/crossdock/
+
+RUN gem install bundler -v $(tail -n 1 $APP_HOME/Gemfile.lock | awk '{$1=$1};1')
 
 RUN apk add --no-cache --virtual .app-builddeps build-base \
   && cd $APP_HOME && bundle install \
