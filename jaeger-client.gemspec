@@ -23,10 +23,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'rubocop', '~> 0.54.0'
-  spec.add_development_dependency 'rubocop-rspec', '~> 1.24.0'
+  spec.add_development_dependency 'rubocop', '~> 1.13'
+  spec.add_development_dependency 'rubocop-rspec', '~> 2.3'
   spec.add_development_dependency 'timecop', '~> 0.9'
-  spec.add_development_dependency 'webmock', '~> 3.4.2'
+  spec.add_development_dependency 'webmock', '~> 3.4'
 
   spec.add_dependency 'opentracing', '~> 0.3'
   spec.add_dependency 'thrift'
