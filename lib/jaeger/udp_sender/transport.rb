@@ -5,10 +5,11 @@ module Jaeger
     class Transport
       FLAGS = 0
 
-      def initialize(host, port)
+      def initialize(host, port, logger:)
         @socket = UDPSocket.new
         @host = host
         @port = port
+        @logger = logger
         @buffer = ::Thrift::MemoryBufferTransport.new
       end
 
@@ -31,9 +32,9 @@ module Jaeger
         @socket.send(bytes, FLAGS, @host, @port)
         @socket.flush
       rescue Errno::ECONNREFUSED
-        warn 'Unable to connect to Jaeger Agent'
+        @logger.warn 'Unable to connect to Jaeger Agent'
       rescue StandardError => e
-        warn "Unable to send spans: #{e.message}"
+        @logger.warn "Unable to send spans: #{e.message}"
       end
     end
   end
