@@ -16,13 +16,18 @@ module Jaeger
       def encode_limited_size(spans, protocol_class, max_message_length)
         batches = []
         current_batch = []
+
         transport.flush
+
+        max_spans_length = max_message_length - empty_batch_size(protocol_class)
+
         spans.each do |span|
           encoded_span = encode_span(span)
-          if aggregated_span_size(encoded_span, protocol_class) > max_message_length && !current_batch.empty?
+          if aggregated_span_size(encoded_span, protocol_class) > max_spans_length && !current_batch.empty?
             batches << encode_batch(current_batch)
             current_batch = []
             transport.flush
+            aggregated_span_size(encoded_span, protocol_class)
           end
           current_batch << encoded_span
         end
@@ -136,6 +141,24 @@ module Jaeger
 
       def transport
         @transport ||= DummyTransport.new
+      end
+
+      # Compact protocol have dynamic size of list header
+      # https://erikvanoosten.github.io/thrift-missing-specification/#_list_and_set_2
+      BATCH_SPANS_SIZE_WINDOW = 4
+
+      def empty_batch_size_cache
+        @empty_batch_size_cache ||= {}
+      end
+
+      def empty_batch_size(protocol_class)
+        empty_batch_size_cache[protocol_class] ||=
+          begin
+            transport = DummyTransport.new
+            protocol = protocol_class.new(transport)
+            encode_batch([]).write(protocol)
+            transport.size + BATCH_SPANS_SIZE_WINDOW
+          end
       end
     end
   end
