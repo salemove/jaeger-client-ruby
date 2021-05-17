@@ -100,4 +100,36 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
       expect(encoded_batches.last.spans.last).to be_a_valid_thrift_span
     end
   end
+
+  context 'when span have reference' do
+    let(:context) do
+      Jaeger::SpanContext.new(
+        trace_id: Jaeger::TraceId.generate,
+        span_id: Jaeger::TraceId.generate,
+        flags: Jaeger::SpanContext::Flags::DEBUG
+      )
+    end
+    let(:reference_context) do
+      Jaeger::SpanContext.new(
+        trace_id: rand(Jaeger::TraceId::MAX_128BIT_UNSIGNED_INT),
+        span_id: Jaeger::TraceId.generate,
+        flags: Jaeger::SpanContext::Flags::DEBUG
+      )
+    end
+    let(:example_references) { [OpenTracing::Reference.follows_from(reference_context)] }
+    let(:example_span) { Jaeger::Span.new(context, 'example_op', nil, references: example_references) }
+    let(:example_spans) { [example_span] }
+
+    it 'encode span with references' do
+      batch = encoder.encode(example_spans)
+      span = batch.spans.first
+      reference = span.references.first
+
+      trace_id_half_range = [-Jaeger::TraceId::MAX_64BIT_SIGNED_INT, Jaeger::TraceId::MAX_64BIT_SIGNED_INT]
+      expect(reference.traceIdLow).to be_between(*trace_id_half_range)
+      expect(reference.traceIdHigh).to be_between(*trace_id_half_range)
+      expect(reference.traceIdLow).not_to eq 0
+      expect(reference.traceIdHigh).not_to eq 0
+    end
+  end
 end
