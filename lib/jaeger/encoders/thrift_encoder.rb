@@ -16,20 +16,24 @@ module Jaeger
       def encode_limited_size(spans, protocol_class, max_message_length)
         batches = []
         current_batch = []
-
-        transport.flush
+        current_batch_size = 0
 
         max_spans_length = max_message_length - empty_batch_size(protocol_class)
 
         spans.each do |span|
           encoded_span = encode_span(span)
-          if aggregated_span_size(encoded_span, protocol_class) > max_spans_length && !current_batch.empty?
+          span_size = message_size(encoded_span, protocol_class)
+
+          next if span_size > max_spans_length
+
+          if (current_batch_size + span_size) > max_spans_length
             batches << encode_batch(current_batch)
             current_batch = []
-            transport.flush
-            aggregated_span_size(encoded_span, protocol_class)
+            current_batch_size = 0
           end
+
           current_batch << encoded_span
+          current_batch_size += span_size
         end
         batches << encode_batch(current_batch) unless current_batch.empty?
         batches
@@ -133,14 +137,11 @@ module Jaeger
         def close; end
       end
 
-      def aggregated_span_size(span, protocol_class)
-        @protocol ||= protocol_class.new(transport)
-        span.write(@protocol)
+      def message_size(message, protocol_class)
+        transport = DummyTransport.new
+        protocol = protocol_class.new(transport)
+        message.write(protocol)
         transport.size
-      end
-
-      def transport
-        @transport ||= DummyTransport.new
       end
 
       # Compact protocol have dynamic size of list header
@@ -153,12 +154,7 @@ module Jaeger
 
       def empty_batch_size(protocol_class)
         empty_batch_size_cache[protocol_class] ||=
-          begin
-            transport = DummyTransport.new
-            protocol = protocol_class.new(transport)
-            encode_batch([]).write(protocol)
-            transport.size + BATCH_SPANS_SIZE_WINDOW
-          end
+          message_size(encode_batch([]), protocol_class) + BATCH_SPANS_SIZE_WINDOW
       end
     end
   end

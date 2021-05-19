@@ -169,4 +169,51 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
       end
     end
   end
+
+  context 'when one span exceed max length' do
+    let(:context) do
+      Jaeger::SpanContext.new(
+        trace_id: Jaeger::TraceId.generate,
+        span_id: Jaeger::TraceId.generate,
+        flags: Jaeger::SpanContext::Flags::DEBUG
+      )
+    end
+    let(:valid_span_before) { Jaeger::Span.new(context, 'first_span', nil) }
+    let(:invalid_span_tags) { { 'key' => '0' * 3_000 } }
+    let(:invalid_span) { Jaeger::Span.new(context, 'invalid_span', nil, tags: invalid_span_tags) }
+    let(:valid_span_after) { Jaeger::Span.new(context, 'after_span', nil) }
+    let(:example_spans) { [valid_span_before, invalid_span, valid_span_after] }
+    let(:max_length) { 2_500 }
+
+    it 'skip invalid span' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::BinaryProtocol, max_length)
+
+      expect(encoded_batches.size).to eq 1
+      expect(encoded_batches.first.spans.size).to eq 2
+      expect(encoded_batches.first.spans.first.operationName).to eq valid_span_before.operation_name
+      expect(encoded_batches.first.spans.last.operationName).to eq valid_span_after.operation_name
+    end
+
+    it 'size of every batch not exceed limit with compact protocol' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::CompactProtocol, max_length)
+      expect(encoded_batches.count).to eq 1
+      encoded_batches.each do |encoded_batch|
+        transport = ::Thrift::MemoryBufferTransport.new
+        protocol = ::Thrift::CompactProtocol.new(transport)
+        encoded_batch.write(protocol)
+        expect(transport.available).to be < max_length
+      end
+    end
+
+    it 'size of every batch not exceed limit with binary protocol' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::BinaryProtocol, max_length)
+      expect(encoded_batches.count).to eq 1
+      encoded_batches.each do |encoded_batch|
+        transport = ::Thrift::MemoryBufferTransport.new
+        protocol = ::Thrift::CompactProtocol.new(transport)
+        encoded_batch.write(protocol)
+        expect(transport.available).to be < max_length
+      end
+    end
+  end
 end
