@@ -3,8 +3,9 @@
 module Jaeger
   module Encoders
     class ThriftEncoder
-      def initialize(service_name:, tags: {})
+      def initialize(service_name:, logger:, tags: {})
         @service_name = service_name
+        @logger = logger
         @tags = prepare_tags(tags)
         @process = Jaeger::Thrift::Process.new('serviceName' => @service_name, 'tags' => @tags)
       end
@@ -24,7 +25,10 @@ module Jaeger
           encoded_span = encode_span(span)
           span_size = message_size(encoded_span, protocol_class)
 
-          next if span_size > max_spans_length
+          if span_size > max_spans_length
+            @logger.warn("Skip span #{span.operation_name} with size #{span_size}")
+            next
+          end
 
           if (current_batch_size + span_size) > max_spans_length
             batches << encode_batch(current_batch)

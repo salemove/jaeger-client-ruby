@@ -16,7 +16,8 @@ RSpec::Matchers.define :be_a_valid_thrift_span do |_|
 end
 
 RSpec.describe Jaeger::Encoders::ThriftEncoder do
-  let(:encoder) { described_class.new(service_name: service_name, tags: tags) }
+  let(:logger) { instance_spy(Logger) }
+  let(:encoder) { described_class.new(service_name: service_name, logger: logger, tags: tags) }
   let(:service_name) { 'service-name' }
   let(:tags) { {} }
 
@@ -192,6 +193,11 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
       expect(encoded_batches.first.spans.size).to eq 2
       expect(encoded_batches.first.spans.first.operationName).to eq valid_span_before.operation_name
       expect(encoded_batches.first.spans.last.operationName).to eq valid_span_after.operation_name
+    end
+
+    it 'log invalid span name' do
+      encoder.encode_limited_size(example_spans, ::Thrift::BinaryProtocol, max_length)
+      expect(logger).to have_received(:warn).with(/Skip span invalid_span with size \d+/)
     end
 
     it 'size of every batch not exceed limit with compact protocol' do

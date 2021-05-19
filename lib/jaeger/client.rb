@@ -54,7 +54,7 @@ module Jaeger
                    injectors: {},
                    extractors: {},
                    tags: {})
-      encoder = Encoders::ThriftEncoder.new(service_name: service_name, tags: tags)
+      encoder = Encoders::ThriftEncoder.new(service_name: service_name, tags: tags, logger: logger)
 
       if sender
         warn '[DEPRECATION] Passing `sender` directly to Jaeger::Client.build is deprecated.' \
