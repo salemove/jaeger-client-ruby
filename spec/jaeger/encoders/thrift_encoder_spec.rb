@@ -145,7 +145,7 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
     let(:example_span) { Jaeger::Span.new(context, 'example_op', nil) }
     let(:example_spans) { Array.new(150, example_span) }
 
-    let(:tags) { Array.new(20) { |index| ["key#{index}", "value#{index}"] }.to_h }
+    let(:tags) { Array.new(50) { |index| ["key#{index}", "value#{index}"] }.to_h }
     let(:max_length) { 5_000 }
 
     it 'size of every batch not exceed limit with compact protocol' do
@@ -167,6 +167,15 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
         protocol = ::Thrift::CompactProtocol.new(transport)
         encoded_batch.write(protocol)
         expect(transport.available).to be < max_length
+      end
+    end
+
+    context 'when limit to low' do
+      let(:max_length) { 500 }
+
+      it 'raise error' do
+        expect { encoder.encode_limited_size(example_spans, ::Thrift::CompactProtocol, max_length) }
+          .to raise_error(StandardError, /Batch header have size \d+, but limit #{max_length}/)
       end
     end
   end

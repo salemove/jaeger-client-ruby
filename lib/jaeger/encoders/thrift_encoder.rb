@@ -19,7 +19,7 @@ module Jaeger
         current_batch = []
         current_batch_size = 0
 
-        max_spans_length = max_message_length - empty_batch_size(protocol_class)
+        max_spans_length = calculate_max_spans_length(protocol_class, max_message_length)
 
         spans.each do |span|
           encoded_span = encode_span(span)
@@ -156,9 +156,17 @@ module Jaeger
         @empty_batch_size_cache ||= {}
       end
 
-      def empty_batch_size(protocol_class)
+      def caclulate_empty_batch_size(protocol_class)
         empty_batch_size_cache[protocol_class] ||=
           message_size(encode_batch([]), protocol_class) + BATCH_SPANS_SIZE_WINDOW
+      end
+
+      def calculate_max_spans_length(protocol_class, max_message_length)
+        empty_batch_size = caclulate_empty_batch_size(protocol_class)
+        max_spans_length = max_message_length - empty_batch_size
+        return max_spans_length if max_spans_length.positive?
+
+        raise "Batch header have size #{empty_batch_size}, but limit #{max_message_length}"
       end
     end
   end
