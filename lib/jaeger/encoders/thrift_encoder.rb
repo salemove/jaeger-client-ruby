@@ -3,8 +3,9 @@
 module Jaeger
   module Encoders
     class ThriftEncoder
-      def initialize(service_name:, tags: {})
+      def initialize(service_name:, logger:, tags: {})
         @service_name = service_name
+        @logger = logger
         @tags = prepare_tags(tags)
         @process = Jaeger::Thrift::Process.new('serviceName' => @service_name, 'tags' => @tags)
       end
@@ -16,15 +17,27 @@ module Jaeger
       def encode_limited_size(spans, protocol_class, max_message_length)
         batches = []
         current_batch = []
-        transport.flush
+        current_batch_size = 0
+
+        max_spans_length = calculate_max_spans_length(protocol_class, max_message_length)
+
         spans.each do |span|
           encoded_span = encode_span(span)
-          if aggregated_span_size(encoded_span, protocol_class) > max_message_length && !current_batch.empty?
+          span_size = message_size(encoded_span, protocol_class)
+
+          if span_size > max_spans_length
+            @logger.warn("Skip span #{span.operation_name} with size #{span_size}")
+            next
+          end
+
+          if (current_batch_size + span_size) > max_spans_length
             batches << encode_batch(current_batch)
             current_batch = []
-            transport.flush
+            current_batch_size = 0
           end
+
           current_batch << encoded_span
+          current_batch_size += span_size
         end
         batches << encode_batch(current_batch) unless current_batch.empty?
         batches
@@ -128,14 +141,32 @@ module Jaeger
         def close; end
       end
 
-      def aggregated_span_size(span, protocol_class)
-        @protocol ||= protocol_class.new(transport)
-        span.write(@protocol)
+      def message_size(message, protocol_class)
+        transport = DummyTransport.new
+        protocol = protocol_class.new(transport)
+        message.write(protocol)
         transport.size
       end
 
-      def transport
-        @transport ||= DummyTransport.new
+      # Compact protocol have dynamic size of list header
+      # https://erikvanoosten.github.io/thrift-missing-specification/#_list_and_set_2
+      BATCH_SPANS_SIZE_WINDOW = 4
+
+      def empty_batch_size_cache
+        @empty_batch_size_cache ||= {}
+      end
+
+      def caclulate_empty_batch_size(protocol_class)
+        empty_batch_size_cache[protocol_class] ||=
+          message_size(encode_batch([]), protocol_class) + BATCH_SPANS_SIZE_WINDOW
+      end
+
+      def calculate_max_spans_length(protocol_class, max_message_length)
+        empty_batch_size = caclulate_empty_batch_size(protocol_class)
+        max_spans_length = max_message_length - empty_batch_size
+        return max_spans_length if max_spans_length.positive?
+
+        raise "Batch header have size #{empty_batch_size}, but limit #{max_message_length}"
       end
     end
   end

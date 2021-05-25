@@ -9,7 +9,7 @@ module Jaeger
       @encoder = encoder
       @logger = logger
 
-      transport = Transport.new(host, port)
+      transport = Transport.new(host, port, logger: logger)
       @protocol_class = ::Thrift::CompactProtocol
       protocol = @protocol_class.new(transport)
       @client = Jaeger::Thrift::Agent::Client.new(protocol)

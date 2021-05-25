@@ -16,7 +16,8 @@ RSpec::Matchers.define :be_a_valid_thrift_span do |_|
 end
 
 RSpec.describe Jaeger::Encoders::ThriftEncoder do
-  let(:encoder) { described_class.new(service_name: service_name, tags: tags) }
+  let(:logger) { instance_spy(Logger) }
+  let(:encoder) { described_class.new(service_name: service_name, logger: logger, tags: tags) }
   let(:service_name) { 'service-name' }
   let(:tags) { {} }
 
@@ -130,6 +131,104 @@ RSpec.describe Jaeger::Encoders::ThriftEncoder do
       expect(reference.traceIdHigh).to be_between(*trace_id_half_range)
       expect(reference.traceIdLow).not_to eq 0
       expect(reference.traceIdHigh).not_to eq 0
+    end
+  end
+
+  context 'when process have additional tags' do
+    let(:context) do
+      Jaeger::SpanContext.new(
+        trace_id: Jaeger::TraceId.generate,
+        span_id: Jaeger::TraceId.generate,
+        flags: Jaeger::SpanContext::Flags::DEBUG
+      )
+    end
+    let(:example_span) { Jaeger::Span.new(context, 'example_op', nil) }
+    let(:example_spans) { Array.new(150, example_span) }
+
+    let(:tags) { Array.new(50) { |index| ["key#{index}", "value#{index}"] }.to_h }
+    let(:max_length) { 5_000 }
+
+    it 'size of every batch not exceed limit with compact protocol' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::CompactProtocol, max_length)
+      expect(encoded_batches.count).to be > 2
+      encoded_batches.each do |encoded_batch|
+        transport = ::Thrift::MemoryBufferTransport.new
+        protocol = ::Thrift::CompactProtocol.new(transport)
+        encoded_batch.write(protocol)
+        expect(transport.available).to be < max_length
+      end
+    end
+
+    it 'size of every batch not exceed limit with binary protocol' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::BinaryProtocol, max_length)
+      expect(encoded_batches.count).to be > 2
+      encoded_batches.each do |encoded_batch|
+        transport = ::Thrift::MemoryBufferTransport.new
+        protocol = ::Thrift::CompactProtocol.new(transport)
+        encoded_batch.write(protocol)
+        expect(transport.available).to be < max_length
+      end
+    end
+
+    context 'when limit to low' do
+      let(:max_length) { 500 }
+
+      it 'raise error' do
+        expect { encoder.encode_limited_size(example_spans, ::Thrift::CompactProtocol, max_length) }
+          .to raise_error(StandardError, /Batch header have size \d+, but limit #{max_length}/)
+      end
+    end
+  end
+
+  context 'when one span exceed max length' do
+    let(:context) do
+      Jaeger::SpanContext.new(
+        trace_id: Jaeger::TraceId.generate,
+        span_id: Jaeger::TraceId.generate,
+        flags: Jaeger::SpanContext::Flags::DEBUG
+      )
+    end
+    let(:valid_span_before) { Jaeger::Span.new(context, 'first_span', nil) }
+    let(:invalid_span_tags) { { 'key' => '0' * 3_000 } }
+    let(:invalid_span) { Jaeger::Span.new(context, 'invalid_span', nil, tags: invalid_span_tags) }
+    let(:valid_span_after) { Jaeger::Span.new(context, 'after_span', nil) }
+    let(:example_spans) { [valid_span_before, invalid_span, valid_span_after] }
+    let(:max_length) { 2_500 }
+
+    it 'skip invalid span' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::BinaryProtocol, max_length)
+
+      expect(encoded_batches.size).to eq 1
+      expect(encoded_batches.first.spans.size).to eq 2
+      expect(encoded_batches.first.spans.first.operationName).to eq valid_span_before.operation_name
+      expect(encoded_batches.first.spans.last.operationName).to eq valid_span_after.operation_name
+    end
+
+    it 'log invalid span name' do
+      encoder.encode_limited_size(example_spans, ::Thrift::BinaryProtocol, max_length)
+      expect(logger).to have_received(:warn).with(/Skip span invalid_span with size \d+/)
+    end
+
+    it 'size of every batch not exceed limit with compact protocol' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::CompactProtocol, max_length)
+      expect(encoded_batches.count).to eq 1
+      encoded_batches.each do |encoded_batch|
+        transport = ::Thrift::MemoryBufferTransport.new
+        protocol = ::Thrift::CompactProtocol.new(transport)
+        encoded_batch.write(protocol)
+        expect(transport.available).to be < max_length
+      end
+    end
+
+    it 'size of every batch not exceed limit with binary protocol' do
+      encoded_batches = encoder.encode_limited_size(example_spans, ::Thrift::BinaryProtocol, max_length)
+      expect(encoded_batches.count).to eq 1
+      encoded_batches.each do |encoded_batch|
+        transport = ::Thrift::MemoryBufferTransport.new
+        protocol = ::Thrift::CompactProtocol.new(transport)
+        encoded_batch.write(protocol)
+        expect(transport.available).to be < max_length
+      end
     end
   end
 end
