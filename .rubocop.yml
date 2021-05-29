@@ -3,6 +3,7 @@ require: rubocop-rspec
 AllCops:
   Exclude:
     - 'thrift/**/*'
+    - 'vendor/bundle/**/*'
   NewCops: enable
   TargetRubyVersion: '2.7'
 
