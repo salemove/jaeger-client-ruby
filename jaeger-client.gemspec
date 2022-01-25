@@ -8,6 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Jaeger::Client::VERSION
   spec.authors       = ['SaleMove TechMovers']
   spec.email         = ['techmovers@salemove.com']
+  spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.summary       = 'OpenTracing Tracer implementation for Jaeger in Ruby'
   spec.description   = ''
@@ -20,16 +21,16 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  spec.required_ruby_version = ['>= 2.7', '< 3.1']
+  spec.required_ruby_version = ['>= 2.7', '< 3.2']
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'rubocop', '~> 1.13'
-  spec.add_development_dependency 'rubocop-rake', '~> 0.5.1'
-  spec.add_development_dependency 'rubocop-rspec', '~> 2.3'
+  spec.add_development_dependency 'rspec', '~> 3.10'
+  spec.add_development_dependency 'rubocop', '~> 1.25'
+  spec.add_development_dependency 'rubocop-rake', '~> 0.6'
+  spec.add_development_dependency 'rubocop-rspec', '~> 2.8'
   spec.add_development_dependency 'timecop', '~> 0.9'
-  spec.add_development_dependency 'webmock', '~> 3.4'
+  spec.add_development_dependency 'webmock', '~> 3.14'
 
   spec.add_dependency 'opentracing', '~> 0.3'
   spec.add_dependency 'thrift'

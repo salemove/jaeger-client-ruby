@@ -14,7 +14,7 @@ describe Jaeger::Extractors::JaegerRackCodec do
   let(:span_id) { 'aba8be8d019abed2' }
   let(:flags) { '1' }
   let(:hexa_max_uint64) { 'ff' * 8 }
-  let(:max_uint64) { 2**64 - 1 }
+  let(:max_uint64) { (2**64) - 1 }
 
   shared_examples 'a valid trace' do
     it 'has flags' do

@@ -10,8 +10,8 @@ describe Jaeger::Extractors::B3RackCodec do
   let(:flags) { '1' }
   let(:hexa_max_uint64) { 'f' * 16 }
   let(:hexa_max_uint128) { 'f' * 32 }
-  let(:max_uint64) { 2**64 - 1 }
-  let(:max_uint128) { 2**128 - 1 }
+  let(:max_uint64) { (2**64) - 1 }
+  let(:max_uint128) { (2**128) - 1 }
 
   context 'when header HTTP_X_B3_SAMPLED is present' do
     let(:carrier) do

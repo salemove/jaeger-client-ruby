@@ -23,8 +23,8 @@ describe Jaeger::Extractors::TraceContextRackCodec do
     carrier = { 'HTTP_TRACEPARENT' => '00-ffffffffffffffffffffffffffffffff-ffffffffffffffff-01' }
     span_context = described_class.extract(carrier)
 
-    expect(span_context.trace_id).to eq(2**128 - 1)
-    expect(span_context.span_id).to eq(2**64 - 1)
+    expect(span_context.trace_id).to eq((2**128) - 1)
+    expect(span_context.span_id).to eq((2**64) - 1)
     expect(span_context.sampled?).to eq(true)
   end
 

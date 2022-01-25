@@ -58,7 +58,7 @@ module Jaeger
 
       if sender
         warn '[DEPRECATION] Passing `sender` directly to Jaeger::Client.build is deprecated.' \
-          'Please use `reporter` instead.'
+             'Please use `reporter` instead.'
       end
 
       reporter ||= Reporters::RemoteReporter.new(
