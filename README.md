@@ -3,6 +3,8 @@ Jaeger::Client
 [![Gem Version](https://badge.fury.io/rb/jaeger-client.svg)](https://rubygems.org/gems/jaeger-client)
 [![Build Status](https://github.com/salemove/jaeger-client-ruby/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/salemove/jaeger-client-ruby/actions/workflows/ci.yml?query=branch%3Amaster)
 
+**This project is not actively maintained. Please consider using [OpenTelemetry](https://opentelemetry.io/)**
+
 OpenTracing Tracer implementation for Jaeger in Ruby
 
 ## Installation
