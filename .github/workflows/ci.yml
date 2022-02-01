@@ -5,6 +5,7 @@ on:
   pull_request:
     branches: [ master ]
   schedule:
+    # Runs at 00:00 UTC on the 1st of every month.
     - cron: '0 0 1 * *'
 
 jobs:
@@ -12,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby-version: ['2.7.2', '3.0', '3.1', 'head']
+        ruby-version: ['2.7.2', '3.0', '3.1']
 
     services:
       postgres:
