@@ -26,8 +26,8 @@ describe Jaeger::Injectors::TraceContextRackCodec do
 
   it 'sets traceparent with largest trace id and span id' do
     span_context = build_span_context(
-      trace_id: 2**128 - 1,
-      span_id: 2**64 - 1,
+      trace_id: (2**128) - 1,
+      span_id: (2**64) - 1,
       flags: Jaeger::SpanContext::Flags::SAMPLED
     )
 

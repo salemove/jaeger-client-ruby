@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    jaeger-client (1.1.0)
+    jaeger-client (1.2.0)
       opentracing (~> 0.3)
       thrift
 
@@ -14,15 +14,15 @@ GEM
     rack (2.2.3)
     rack-protection (2.1.0)
       rack
-    ruby2_keywords (0.0.4)
+    ruby2_keywords (0.0.5)
     sinatra (2.1.0)
       mustermann (~> 1.0)
       rack (~> 2.2)
       rack-protection (= 2.1.0)
       tilt (~> 2.0)
-    thrift (0.14.0)
+    thrift (0.15.0)
     tilt (2.0.10)
-    webrick (1.4.4)
+    webrick (1.7.0)
 
 PLATFORMS
   ruby
@@ -31,7 +31,7 @@ DEPENDENCIES
   jaeger-client!
   rack
   sinatra
-  webrick (~> 1.4.2)
+  webrick (~> 1.7)
 
 BUNDLED WITH
-   2.2.15
+   2.3.5

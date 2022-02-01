@@ -31,8 +31,8 @@ module Jaeger
 
       if removed_scope != self # rubocop:disable Style/GuardClause
         raise 'Removed non-active scope, ' \
-          "removed: #{removed_scope.inspect}, "\
-          "expected: #{inspect}"
+              "removed: #{removed_scope.inspect}, "\
+              "expected: #{inspect}"
       end
     end
   end

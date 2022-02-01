@@ -27,7 +27,7 @@ RSpec.describe Jaeger::Samplers::Probabilistic do
     let(:rate) { 0.5 }
 
     context 'when trace is over the boundary' do
-      let(:trace_id) { Jaeger::TraceId::TRACE_ID_UPPER_BOUND / 2 + 1 }
+      let(:trace_id) { (Jaeger::TraceId::TRACE_ID_UPPER_BOUND / 2) + 1 }
 
       it 'returns false' do
         expect(is_sampled).to eq(false)
@@ -42,7 +42,7 @@ RSpec.describe Jaeger::Samplers::Probabilistic do
     end
 
     context 'when trace is under the boundary' do
-      let(:trace_id) { Jaeger::TraceId::TRACE_ID_UPPER_BOUND / 2 - 1 }
+      let(:trace_id) { (Jaeger::TraceId::TRACE_ID_UPPER_BOUND / 2) - 1 }
 
       it 'returns true' do
         expect(is_sampled).to eq(true)
