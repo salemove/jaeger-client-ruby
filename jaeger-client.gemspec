@@ -4,15 +4,15 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'jaeger/client/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'jaeger-client'
+  spec.name          = 'dox-jaeger-client'
   spec.version       = Jaeger::Client::VERSION
-  spec.authors       = ['SaleMove TechMovers']
-  spec.email         = ['techmovers@salemove.com']
+  spec.authors       = ['Jeremiah Hemphill']
+  spec.email         = ['jhemphill@doximity.com']
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  spec.summary       = 'OpenTracing Tracer implementation for Jaeger in Ruby'
-  spec.description   = ''
-  spec.homepage      = 'https://github.com/salemove/jaeger-client-ruby'
+  spec.summary       = 'OpenTracing Tracer implementation for Jaeger in Ruby with ruby 3.2 support'
+  spec.description   = 'OpenTracing Tracer implementation for Jaeger in Ruby with ruby 3.2 support'
+  spec.homepage      = 'https://github.com/doximity/jaeger-client-ruby'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  spec.required_ruby_version = ['>= 2.7', '< 3.2']
+  spec.required_ruby_version = ['>= 2.7', '< 3.3']
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake', '~> 13.0'
